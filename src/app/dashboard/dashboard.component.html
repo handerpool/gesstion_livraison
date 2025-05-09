@@ -1,0 +1,71 @@
+<div class="dashboard-container">
+    <app-sidebar></app-sidebar>
+  
+    <!-- Main content -->
+    <div class="main-content">
+      <header class="dashboard-header">
+        <div>
+          <h1 class="dashboard-title">Tableau de bord des livraisons</h1>
+          <p class="dashboard-subtitle">Bienvenue, suivez vos livraisons en temps réel</p>
+        </div>
+  
+        <div class="header-actions">
+          <div class="search-container">
+            <input type="text" placeholder="Rechercher..." class="search-input">
+            <i class="search-icon fas fa-search"></i> 
+          </div>
+  
+          <button class="notification-button">
+            <i class="bell-icon fas fa-bell"></i>
+            <span class="notification-indicator"></span>
+          </button>
+  
+          <div class="user-profile">
+            <div class="avatar">CM</div>
+            <i class="dropdown-icon">▼</i>
+          </div>
+        </div>
+      </header>
+  
+      <main class="dashboard-main">
+        <!-- Stats cards -->
+        <app-stats-cards></app-stats-cards>
+  
+        <!-- Charts section -->
+        <div class="charts-container">
+          <!-- Delivery performance chart -->
+          <ng-container *ngIf="isBrowser">
+            <app-delivery-performance-chart 
+              [selectedPeriod]="selectedPeriod" 
+              (periodChange)="onPeriodChange($event)">
+            </app-delivery-performance-chart>
+          </ng-container>
+  
+          <div class="charts-grid">
+            <!-- Delivery status -->
+            <ng-container *ngIf="isBrowser">
+              <app-delivery-status-chart></app-delivery-status-chart>
+            </ng-container>
+  
+            <!-- Customer satisfaction -->
+            <ng-container *ngIf="isBrowser">
+              <app-customer-satisfaction-chart></app-customer-satisfaction-chart>
+            </ng-container>
+          </div>
+        </div>
+  
+        <!-- Recent deliveries and top locations -->
+        <div class="bottom-grid">
+          <!-- Recent deliveries -->
+          <app-recent-deliveries 
+            [deliveries]="recentDeliveries" 
+            [selectedTab]="selectedTab"
+            (tabChange)="onTabChange($event)">
+          </app-recent-deliveries>
+  
+          <!-- Top delivery locations -->
+          <app-top-locations [locations]="topLocations"></app-top-locations>
+        </div>
+      </main>
+    </div>
+</div>

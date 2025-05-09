@@ -1,0 +1,30 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="profile-image">
+      <img src="assets/placeholder.svg" alt="Merchant profile">
+    </div>
+    <h2 class="profile-name">Commerçant</h2>
+    <p class="profile-badge">Premium</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button 
+      *ngFor="let item of menuItems; let i = index" 
+      class="nav-item" 
+      [class.active]="item.active"
+      (click)="navigate(item.route, i)">
+      <i class="nav-icon" [ngClass]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="plan-info">
+      <div>
+        <p class="plan-name">Plan Premium</p>
+        <p class="plan-expiry">Expire le 15/06/2025</p>
+      </div>
+      <span class="plan-badge">Actif</span>
+    </div>
+  </div>
+</div>

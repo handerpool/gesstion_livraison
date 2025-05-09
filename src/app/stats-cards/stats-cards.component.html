@@ -1,0 +1,17 @@
+<div class="stats-grid">
+  <div class="stats-card" *ngFor="let card of statsCards">
+    <div class="stats-content">
+      <div>
+        <p class="stats-title">{{ card.title }}</p>
+        <h3 class="stats-value">{{ card.value }}</h3>
+        <p class="stats-change" [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}">
+          <i class="trend-icon" [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}"></i>
+          {{ card.change }} ce mois-ci
+        </p>
+      </div>
+      <div class="stats-icon" [style.background-color]="card.iconBg + '1A'">
+        <i class="fas fa-{{ card.icon }}" [style.color]="card.iconBg"></i>
+      </div>
+    </div>
+  </div>
+</div>

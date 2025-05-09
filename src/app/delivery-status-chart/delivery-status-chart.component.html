@@ -1,0 +1,21 @@
+<div class="chart-card">
+    <div class="chart-header">
+      <h3 class="chart-title">Statut des livraisons</h3>
+    </div>
+    <div class="chart-content">
+      <div class="chart-container">
+        <canvas baseChart
+          [data]="doughnutChartData"
+          [options]="doughnutChartOptions"
+          [type]="'doughnut'">
+        </canvas>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item" *ngFor="let item of statusItems">
+          <span class="legend-color" [style.background-color]="item.color"></span>
+          <span class="legend-label">{{ item.label }}</span>
+          <span class="legend-value">{{ item.value }}</span>
+        </div>
+      </div>
+    </div>
+  </div>

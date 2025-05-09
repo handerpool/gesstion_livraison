@@ -1,0 +1,164 @@
+.deliveries-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .deliveries-header {
+    padding: 1.5rem 1.5rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .deliveries-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .deliveries-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .tabs-container {
+    display: flex;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    overflow: hidden;
+  }
+  
+  .tab-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+  
+  .tab-button.active {
+    background-color: #f3f4f6;
+    font-weight: 500;
+  }
+  
+  .filter-button {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .deliveries-content {
+    padding: 1.5rem;
+  }
+  
+  .delivery-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .delivery-status-indicator {
+    width: 0.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    margin-right: 1rem;
+  }
+  
+  .delivery-status-indicator.status-delivered {
+    background-color: #10b981;
+  }
+  
+  .delivery-status-indicator.status-in-progress {
+    background-color: #f59e0b;
+  }
+  
+  .delivery-status-indicator.status-pending {
+    background-color: #ef4444;
+  }
+  
+  .delivery-info {
+    flex: 1;
+  }
+  
+  .delivery-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+  
+  .delivery-id {
+    font-weight: 500;
+    margin-right: 0.5rem;
+  }
+  
+  .delivery-status-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+  }
+  
+  .delivery-status-badge.status-delivered {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+  
+  .delivery-status-badge.status-in-progress {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+  
+  .delivery-status-badge.status-pending {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .delivery-customer {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+  }
+  
+  .delivery-details {
+    text-align: right;
+    margin-right: 1rem;
+  }
+  
+  .delivery-amount {
+    font-weight: 500;
+    margin: 0 0 0.25rem 0;
+  }
+  
+  .delivery-courier {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+  }
+  
+  .delivery-actions-button {
+    padding: 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .deliveries-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+  
+  .view-all-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    background: none;
+    cursor: pointer;
+  }

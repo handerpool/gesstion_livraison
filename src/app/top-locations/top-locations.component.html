@@ -1,0 +1,28 @@
+<div class="locations-card">
+    <div class="locations-header">
+      <h3 class="locations-title">Zones de livraison populaires</h3>
+    </div>
+    <div class="locations-content">
+      <div class="location-item" *ngFor="let location of locations">
+        <div class="location-header">
+          <div class="location-name">
+            <i class="location-icon">📍</i>
+            <span>{{ location.name }}</span>
+          </div>
+          <span class="location-percentage">{{ location.percentage }}%</span>
+        </div>
+        <div class="location-progress">
+          <div class="progress-bar" [style.width.%]="location.percentage"></div>
+        </div>
+      </div>
+  
+      <div class="active-zone">
+        <h4 class="active-zone-title">
+          <i class="location-icon">📍</i>
+          Zone la plus active
+        </h4>
+        <p class="active-zone-name">Paris - Centre ville</p>
+        <p class="active-zone-percentage">40% de toutes les livraisons</p>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,82 @@
+.locations-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .locations-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .locations-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .locations-content {
+    padding: 1.5rem;
+  }
+  
+  .location-item {
+    margin-bottom: 1.5rem;
+  }
+  
+  .location-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .location-name {
+    display: flex;
+    align-items: center;
+  }
+  
+  .location-icon {
+    margin-right: 0.5rem;
+    color: #2A9D8F;
+  }
+  
+  .location-percentage {
+    font-weight: 500;
+  }
+  
+  .location-progress {
+    height: 0.5rem;
+    background-color: #f3f4f6;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background-color: #2A9D8F;
+    border-radius: 9999px;
+  }
+  
+  .active-zone {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: rgba(42, 157, 143, 0.1);
+    border-radius: 0.5rem;
+  }
+  
+  .active-zone-title {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .active-zone-name {
+    font-size: 0.875rem;
+    margin: 0.25rem 0;
+  }
+  
+  .active-zone-percentage {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0.25rem 0 0 0;
+  }

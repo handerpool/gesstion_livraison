@@ -1,0 +1,277 @@
+<div class="orders-container">
+    <!-- Sidebar -->
+    <app-sidebar></app-sidebar>
+  
+    <!-- Main content -->
+    <div class="main-content">
+      <header class="orders-header">
+        <div>
+          <h1 class="orders-title">Commandes</h1>
+          <p class="orders-subtitle">Gérez vos commandes et suivez leur statut</p>
+        </div>
+  
+        <div class="header-actions">
+          <div class="search-container">
+            <input 
+              type="text" 
+              placeholder="Rechercher une commande..." 
+              class="search-input"
+              (input)="onSearch($event)">
+              <i class="search-icon fas fa-search"></i> 
+          </div>
+  
+          <button class="notification-button">
+            <i class="bell-icon fas fa-bell"></i>
+            <span class="notification-indicator"></span>
+          </button>
+  
+          <div class="user-profile">
+            <div class="avatar">CM</div>
+            <i class="dropdown-icon">▼</i>
+          </div>
+        </div>
+      </header>
+  
+      <main class="orders-main">
+        <!-- Filters -->
+        <div class="filters-container">
+          <div class="filter-group">
+            <label for="status-filter">Filtrer par statut:</label>
+            <select 
+              id="status-filter" 
+              class="filter-select"
+              [value]="selectedStatus"
+              (change)="onStatusChange($event)">
+              <option *ngFor="let option of statusOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+  
+          <div class="filter-group">
+            <label for="sort-by">Trier par:</label>
+            <div class="sort-controls">
+              <select 
+                id="sort-by" 
+                class="filter-select"
+                [value]="sortBy"
+                (change)="onSortChange($event)">
+                <option *ngFor="let option of sortOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              <button class="sort-direction-button" (click)="toggleSortDirection()">
+                <i class="sort-icon fas" [ngClass]="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
+            </button>
+            </div>
+          </div>
+  
+          <div class="filter-actions">
+            <button class="action-button primary">
+              <i class="add-icon">+</i>
+              Nouvelle commande
+            </button>
+            <button class="action-button secondary">
+              <i class="export-icon">↓</i>
+              Exporter
+            </button>
+          </div>
+        </div>
+  
+        <!-- Orders table -->
+        <div class="orders-table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>N° Commande</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of filteredOrders">
+                <td class="order-id">{{ order.id }}</td>
+                <td>
+                  <div class="customer-info">
+                    <span class="customer-name">{{ order.customer.name }}</span>
+                    <span class="customer-email">{{ order.customer.email }}</span>
+                  </div>
+                </td>
+                <td>{{ order.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                </td>
+                <td class="order-total">{{ order.total }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="table-action-button" (click)="viewOrderDetails(order)" title="Voir les détails">
+                        <i class="view-icon fas fa-eye"></i>
+                    </button>
+                    <button class="table-action-button" title="Modifier">
+                        <i class="edit-icon fas fa-pen"></i>                   
+                    </button>
+                    <button class="table-action-button" title="Plus d'options">
+                        <i class="fas fa-ellipsis-v more-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+  
+          <!-- Empty state -->
+          <div class="empty-state" *ngIf="filteredOrders.length === 0">
+            <div class="empty-icon">
+                <i class="fas fa-box-open"></i>
+              </div>            
+            <h3>Aucune commande trouvée</h3>
+            <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
+          </div>
+        </div>
+  
+        <!-- Pagination -->
+        <div class="pagination-container" *ngIf="totalItems > 0">
+          <div class="pagination-info">
+            Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à 
+            {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} commandes
+          </div>
+          <div class="pagination-controls">
+            <button 
+              class="pagination-button" 
+              [disabled]="currentPage === 1"
+              (click)="onPageChange(currentPage - 1)">
+              Précédent
+            </button>
+            
+            <button 
+              *ngIf="currentPage > 3"
+              class="pagination-button"
+              (click)="onPageChange(1)">
+              1
+            </button>
+            
+            <span *ngIf="currentPage > 3" class="pagination-ellipsis">...</span>
+            
+            <button 
+              *ngFor="let page of getPageNumbers()"
+              class="pagination-button"
+              [class.active]="page === currentPage"
+              (click)="onPageChange(page)">
+              {{ page }}
+            </button>
+            
+            <span *ngIf="currentPage < getTotalPages() - 2" class="pagination-ellipsis">...</span>
+            
+            <button 
+              *ngIf="currentPage < getTotalPages() - 2"
+              class="pagination-button"
+              (click)="onPageChange(getTotalPages())">
+              {{ getTotalPages() }}
+            </button>
+            
+            <button 
+              class="pagination-button" 
+              [disabled]="currentPage === getTotalPages()"
+              (click)="onPageChange(currentPage + 1)">
+              Suivant
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  
+    <!-- Order detail modal -->
+    <div class="modal-overlay" *ngIf="isDetailModalOpen" (click)="closeDetailModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">Détails de la commande {{ selectedOrder?.id }}</h2>
+          <button class="modal-close-button" (click)="closeDetailModal()">×</button>
+        </div>
+        
+        <div class="modal-body" *ngIf="selectedOrder">
+          <div class="order-detail-grid">
+            <div class="order-detail-section">
+              <h3 class="section-title">Informations client</h3>
+              <div class="detail-item">
+                <span class="detail-label">Nom:</span>
+                <span class="detail-value">{{ selectedOrder.customer.name }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">{{ selectedOrder.customer.email }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Téléphone:</span>
+                <span class="detail-value">{{ selectedOrder.customer.phone }}</span>
+              </div>
+            </div>
+            
+            <div class="order-detail-section">
+              <h3 class="section-title">Informations commande</h3>
+              <div class="detail-item">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">{{ selectedOrder.date | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Statut:</span>
+                <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedOrder.status)">
+                  {{ getStatusLabel(selectedOrder.status) }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Paiement:</span>
+                <span class="detail-value">{{ selectedOrder.paymentMethod }}</span>
+              </div>
+            </div>
+            
+            <div class="order-detail-section full-width">
+              <h3 class="section-title">Adresse de livraison</h3>
+              <div class="detail-item">
+                <span class="detail-value">{{ selectedOrder.address }}</span>
+              </div>
+            </div>
+            
+            <div class="order-detail-section full-width">
+              <h3 class="section-title">Articles commandés</h3>
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Article</th>
+                    <th>Quantité</th>
+                    <th>Prix unitaire</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of selectedOrder.items">
+                    <td>{{ item.name }}</td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-right">{{ item.price }}</td>
+                    <td class="text-right">
+                      {{ (parseFloat(item.price.replace('€', '').replace(',', '.')) * item.quantity).toFixed(2) + ' €' }}
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" class="text-right"><strong>Total</strong></td>
+                    <td class="text-right"><strong>{{ selectedOrder.total }}</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
+          <button class="action-button primary">Modifier le statut</button>
+        </div>
+      </div>
+    </div>
+  </div>

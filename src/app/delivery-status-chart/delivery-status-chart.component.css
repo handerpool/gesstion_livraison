@@ -1,0 +1,56 @@
+.chart-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+  }
+  
+  .chart-header {
+    margin-bottom: 1rem;
+  }
+  
+  .chart-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .chart-content {
+    display: flex;
+  }
+  
+  .chart-container {
+    width: 50%;
+    height: 10rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .chart-legend {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .legend-color {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+  }
+  
+  .legend-label {
+    flex: 1;
+  }
+  
+  .legend-value {
+    font-weight: 500;
+  }
