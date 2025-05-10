@@ -1,7 +1,12 @@
 import { NgClass, NgFor } from '@angular/common';
-import { Component, NgModule } from '@angular/core';
+import { Component, NgModule, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
+interface MenuItem {
+  label: string;
+  icon: string;
+  route: string;
+  active: boolean;
+}
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -9,31 +14,79 @@ import { Router } from '@angular/router';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
-export class SidebarComponent {
-  menuItems = [
-    { icon: 'home', label: 'Tableau de bord', route: '/dashboard', active: false },
-    { icon: 'package', label: 'Commandes', route: '/orders', active: false },
-    { icon: 'truck', label: 'Livraisons', route: '/deliveries', active: false },
-    { icon: 'users', label: 'Clients', route: '/customers', active: false },
-    { icon: 'dollar-sign', label: 'Finances', route: '/finances', active: false },
-    { icon: 'settings', label: 'Paramètres', route: '/settings', active: false }
+export class SidebarComponent implements OnInit {
+  menuItems: MenuItem[] = [
+    {
+      label: 'Tableau de bord',
+      icon: 'fas fa-tachometer-alt',
+      route: '/dashboard',
+      active: false
+    },
+    {
+      label: 'Commandes',
+      icon: 'fas fa-shopping-cart',
+      route: '/orders',
+      active: false
+    },
+    {
+      label: 'Livraisons',
+      icon: 'fas fa-truck',
+      route: '/deliveries',
+      active: false
+    },
+    {
+      label: 'Clients',
+      icon: 'fas fa-users',
+      route: '/clients',
+      active: false
+    },
+    {
+      label: 'Finances',
+      icon: 'fas fa-chart-line',
+      route: '/finance',
+      active: false
+    },
+    {
+      label: 'Paramètres',
+      icon: 'fas fa-cog',
+      route: '/settings',
+      active: false
+    }
   ];
 
-  constructor(private router: Router) {
-    // Set active menu item based on current route
-    this.setActiveFromRoute(this.router.url);
-  }
+  constructor(private router: Router) { }
 
-  setActiveFromRoute(route: string): void {
-    this.menuItems.forEach(item => {
-      item.active = item.route === route;
+  ngOnInit(): void {
+    // Set active menu item based on current route
+    this.setActiveMenuItem(this.router.url);
+    
+    // Subscribe to router events to update active menu item
+    this.router.events.subscribe(() => {
+      this.setActiveMenuItem(this.router.url);
     });
   }
 
   navigate(route: string, index: number): void {
-    this.menuItems.forEach((item, i) => {
-      item.active = i === index;
-    });
+    // Update active state
+    this.menuItems.forEach(item => item.active = false);
+    this.menuItems[index].active = true;
+    
+    // Navigate to the route
     this.router.navigate([route]);
   }
+
+  private setActiveMenuItem(currentRoute: string): void {
+    // Reset all active states
+    this.menuItems.forEach(item => item.active = false);
+    
+    // Find and set the active menu item
+    const activeItem = this.menuItems.find(item => currentRoute.startsWith(item.route));
+    if (activeItem) {
+      activeItem.active = true;
+    } else {
+      // Default to dashboard if no match
+      this.menuItems[0].active = true;
+    }
+  }
 }
+
