@@ -106,7 +106,7 @@
                     {{ getStatusLabel(order.status) }}
                   </span>
                 </td>
-                <td class="order-total">{{ order.total }}</td>
+                <td class="order-total">{{ order.total || 'N/A'}}</td>
                 <td>
                   <div class="action-buttons">
                     <button class="table-action-button" (click)="viewOrderDetails(order)" title="Voir les détails">
@@ -253,7 +253,7 @@
                     <td class="text-center">{{ item.quantity }}</td>
                     <td class="text-right">{{ item.price }}</td>
                     <td class="text-right">
-                      {{ (parseFloat(item.price.replace('€', '').replace(',', '.')) * item.quantity).toFixed(2) + ' €' }}
+                      {{ (parseFloat(item.price.replace('DTN', '').replace(',', '.')) * item.quantity).toFixed(2) + ' DTN' }}
                     </td>
                   </tr>
                 </tbody>

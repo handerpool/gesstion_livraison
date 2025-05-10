@@ -15,7 +15,7 @@ import { DeliveryService } from '../services/delivery.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RecentDeliveriesComponent, DeliveryStatusChartComponent, CustomerSatisfactionChartComponent, DeliveryPerformanceChartComponent, StatsCardsComponent, SidebarComponent, TopLocationsComponent,NgIf],
+  imports: [RecentDeliveriesComponent, StatsCardsComponent,DeliveryPerformanceChartComponent,DeliveryPerformanceChartComponent,DeliveryStatusChartComponent, CustomerSatisfactionChartComponent, SidebarComponent, TopLocationsComponent,NgIf],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -49,16 +49,17 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchRecentDeliveries(): void {
-    this.deliveryService.getRecentDeliveries().subscribe(data => {
+    this.deliveryService.getRecentDeliveries(0,10).subscribe(data => {
       this.recentDeliveries = data;
     });
   }
 
   fetchTopLocations(): void {
-    this.deliveryService.getTopLocations().subscribe(data => {
+    this.deliveryService.getTopLocations(0, 10).subscribe(data => {
       this.topLocations = data;
     });
   }
+
   onPeriodChange(period: string): void {
     this.selectedPeriod = period;
   }

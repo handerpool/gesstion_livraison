@@ -16,13 +16,13 @@
         </div>
       </div>
   
-      <div class="active-zone">
+      <div class="active-zone" *ngIf="activeZone">
         <h4 class="active-zone-title">
           <i class="location-icon">📍</i>
           Zone la plus active
         </h4>
-        <p class="active-zone-name">Paris - Centre ville</p>
-        <p class="active-zone-percentage">40% de toutes les livraisons</p>
+        <p class="active-zone-name">{{ activeZone.name}}</p>
+        <p class="active-zone-percentage">{{activeZone.percentage}}</p>
       </div>
     </div>
   </div>

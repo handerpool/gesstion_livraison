@@ -58,6 +58,7 @@
         <div class="bottom-grid">
           <!-- Recent deliveries -->
           <app-recent-deliveries 
+            *ngIf="recentDeliveries.length > 0"
             [deliveries]="recentDeliveries" 
             [selectedTab]="selectedTab"
             (tabChange)="onTabChange($event)">
