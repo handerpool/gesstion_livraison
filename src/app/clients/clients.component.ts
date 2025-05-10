@@ -2,12 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Client } from '../models/client.model';
 import { FormsModule } from '@angular/forms';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule,FormsModule,SidebarComponent],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.css'
 })

@@ -19,7 +19,7 @@ import { DeliveryService } from '../services/delivery.service';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
   private platformId = inject(PLATFORM_ID);
   isBrowser = isPlatformBrowser(this.platformId); // Check if we're in a browser environment
 
@@ -38,27 +38,12 @@ export class DashboardComponent implements OnInit {
   selectedPeriod: string = 'week';
   selectedTab: string = 'all';
 
-  recentDeliveries: Delivery[] = [];
-  topLocations: Location[] = [];
+  recentDeliveries: Delivery[] = [
+  ];
 
-  private deliveryService = inject(DeliveryService);
-
-  ngOnInit(): void {
-    this.fetchRecentDeliveries();
-    this.fetchTopLocations();
-  }
-
-  fetchRecentDeliveries(): void {
-    this.deliveryService.getRecentDeliveries(0,10).subscribe(data => {
-      this.recentDeliveries = data;
-    });
-  }
-
-  fetchTopLocations(): void {
-    this.deliveryService.getTopLocations(0, 10).subscribe(data => {
-      this.topLocations = data;
-    });
-  }
+  // Top delivery locations
+  topLocations: Location[] = [
+  ];
 
   onPeriodChange(period: string): void {
     this.selectedPeriod = period;

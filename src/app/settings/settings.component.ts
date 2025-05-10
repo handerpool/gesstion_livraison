@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 interface NotificationSetting {
   id: string;
   label: string;
@@ -17,7 +18,7 @@ interface UserProfile {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule,CommonModule,SidebarComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css'
 })

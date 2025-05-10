@@ -124,7 +124,7 @@
   }
   
   .search-box input {
-    width: 100%;
+    width: 80%;
     padding: 8px 15px 8px 35px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -247,4 +247,14 @@
     .filter-controls select {
       width: 100%;
     }
+  }
+  .dashboard-container {
+    display: flex;
+    height: 97vh;
+    background-color: white;
+  }
+  
+  .main-content {
+    flex: 1;
+    overflow: auto;
   }

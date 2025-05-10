@@ -3,11 +3,12 @@ import { FinancialSummary, MonthlyRevenue, Transaction } from '../models/transac
 import { Chart, ChartConfiguration } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-finance',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule,FormsModule,SidebarComponent],
   templateUrl: './finance.component.html',
   styleUrl: './finance.component.css'
 })
