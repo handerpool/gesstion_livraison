@@ -1,277 +1,330 @@
 <div class="deliveries-container">
-    <!-- Sidebar -->
-    <app-sidebar></app-sidebar>
-  
-    <!-- Main content -->
-    <div class="main-content">
-      <header class="deliveries-header">
-        <div>
-          <h1 class="deliveries-title">Livraisons</h1>
-          <p class="deliveries-subtitle">Suivez et gérez vos livraisons en temps réel</p>
-        </div>
-  
-        <div class="header-actions">
-          <div class="search-container">
-            <input 
-              type="text" 
-              placeholder="Rechercher une livraison..." 
-              class="search-input"
-              (input)="onSearch($event)">
-              <i class="search-icon fas fa-search"></i> 
-              </div>
-  
-          <button class="notification-button">
-            <i class="bell-icon fas fa-bell"></i>
-            <span class="notification-indicator"></span>
-          </button>
-  
-          <div class="user-profile">
-            <div class="avatar">CM</div>
-            <i class="dropdown-icon">▼</i>
-          </div>
-        </div>
-      </header>
-  
-      <main class="deliveries-main">
-        <!-- Filters -->
-        <div class="filters-container">
-          <div class="filter-group">
-            <label for="status-filter">Statut:</label>
-            <select 
-              id="status-filter" 
-              class="filter-select"
-              [value]="selectedStatus"
-              (change)="onStatusChange($event)">
-              <option *ngFor="let option of statusOptions" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-          </div>
-  
-          <div class="filter-group">
-            <label for="date-filter">Date:</label>
-            <input 
-              type="date" 
-              id="date-filter" 
-              class="filter-input"
-              [value]="selectedDate"
-              (change)="onDateChange($event)">
-          </div>
-  
-          <div class="filter-group">
-            <label for="agent-filter">Livreur:</label>
-            <select 
-              id="agent-filter" 
-              class="filter-select"
-              [value]="selectedAgent"
-              (change)="onAgentChange($event)">
-              <option *ngFor="let agent of deliveryAgents" [value]="agent.id">
-                {{ agent.name }}
-              </option>
-            </select>
-          </div>
-  
-          <div class="view-toggle">
-            <button 
-              class="view-button" 
-              [class.active]="viewMode === 'list'"
-              (click)="viewMode = 'list'">
-              <i class="list-icon fas fa-list-alt"></i>
+  <!-- Sidebar -->
+  <app-sidebar></app-sidebar>
 
-              Liste
+  <!-- Main content -->
+  <div class="main-content">
+    <header class="deliveries-header">
+      <div>
+        <h1 class="deliveries-title">Livraisons</h1>
+        <p class="deliveries-subtitle">Suivez et gérez vos livraisons en temps réel</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="search-container">
+          <input
+            type="text"
+            placeholder="Rechercher une livraison..."
+            class="search-input"
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()"
+          />
+          <i class="search-icon fas fa-search"></i>
+        </div>
+
+        <button class="notification-button">
+          <i class="bell-icon fas fa-bell"></i>
+          <span class="notification-indicator"></span>
+        </button>
+
+        <div class="user-profile">
+          <div class="avatar">CM</div>
+          <i class="dropdown-icon">▼</i>
+        </div>
+      </div>
+    </header>
+
+    <main class="deliveries-main">
+      <!-- Filters -->
+      <div class="filters-container">
+        <div class="filter-group">
+          <label for="status-filter">Statut:</label>
+          <select
+            id="status-filter"
+            class="filter-select"
+            [(ngModel)]="selectedStatus"
+            (change)="applyFilters()"
+          >
+            <option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="date-filter">Date:</label>
+          <input
+            type="date"
+            id="date-filter"
+            class="filter-input"
+            [(ngModel)]="selectedDate"
+            (change)="applyFilters()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label for="agent-filter">Livreur:</label>
+          <select
+            id="agent-filter"
+            class="filter-select"
+            [(ngModel)]="selectedAgent"
+            (change)="applyFilters()"
+          >
+            <option *ngFor="let agent of deliveryAgents" [value]="agent.id">
+              {{ agent.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="view-toggle">
+          <button
+            class="view-button"
+            [class.active]="viewMode === 'list'"
+            (click)="viewMode = 'list'"
+          >
+            <i class="list-icon fas fa-list-alt"></i>
+            Liste
+          </button>
+          <button
+            class="view-button"
+            [class.active]="viewMode === 'map'"
+            (click)="viewMode = 'map'"
+          >
+            <i class="card-icon fas fa-clone"></i>
+            Carte
+          </button>
+        </div>
+      </div>
+
+      <!-- List View -->
+      <div class="deliveries-grid" *ngIf="viewMode === 'list'">
+        <div class="delivery-card" *ngFor="let delivery of filteredDeliveries">
+          <div class="delivery-header">
+            <div class="delivery-id">{{ delivery.id }}</div>
+            <span class="status-badge" [ngClass]="getStatusClass(delivery.status)">
+              {{ getStatusLabel(delivery.status) }}
+            </span>
+          </div>
+
+          <div class="delivery-customer">
+            <div class="customer-name">{{ delivery.customer.name }}</div>
+            <div class="customer-address">{{ delivery.customer.address }}</div>
+          </div>
+
+          <div class="delivery-info">
+            <div class="info-item">
+              <span class="info-label">Montant:</span>
+              <span class="info-value">{{ delivery.amount }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Date/Heure:</span>
+              <span class="info-value">{{ delivery.time | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-item" *ngIf="delivery.courier">
+              <span class="info-label">Livreur:</span>
+              <span class="info-value">{{ delivery.courier }}</span>
+            </div>
+          </div>
+
+          <div class="delivery-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getDeliveryProgress(delivery)"></div>
+            </div>
+          </div>
+
+          <div class="delivery-actions">
+            <button class="action-button secondary" (click)="viewDeliveryDetails(delivery)">
+              <i class="details-icon fas fa-info-circle"></i>
+              Détails
             </button>
-            <button 
-              class="view-button" 
-              [class.active]="viewMode === 'map'"
-              (click)="viewMode = 'map'">
-              <i class="card-icon fas fa-clone"></i>
-              Carte
+            <button class="action-button primary" (click)="openMapModal(delivery)">
+              <i class="location-icon fas fa-map-marker-alt"></i>
+              Localiser
             </button>
           </div>
         </div>
-  
-        <!-- List View -->
-        <div class="deliveries-grid" *ngIf="viewMode === 'list'">
-          <div class="delivery-card" *ngFor="let delivery of filteredDeliveries">
-            <div class="delivery-header">
-              <div class="delivery-id">{{ delivery.id }}</div>
-              <span class="status-badge" [ngClass]="getStatusClass(delivery.status)">
-                {{ getStatusLabel(delivery.status) }}
+      </div>
+
+      <!-- Map View -->
+      <div class="map-container" *ngIf="viewMode === 'map'">
+        <div class="map-placeholder">
+          <div class="map-overlay">
+            <h3>Vue Carte</h3>
+            <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie comme Google Maps ou Leaflet.</p>
+            <p>Dans une application réelle, vous verriez ici une carte interactive avec les emplacements des livraisons.</p>
+          </div>
+        </div>
+
+        <div class="map-sidebar">
+          <h3 class="sidebar-title">Livraisons actives</h3>
+          <div class="map-delivery-list">
+            <div
+              class="map-delivery-item"
+              *ngFor="let delivery of filteredDeliveries"
+              [class.active]="selectedDelivery?.id === delivery.id"
+              (click)="selectedDelivery = delivery"
+            >
+              <div class="map-delivery-header">
+                <span class="map-delivery-id">{{ delivery.id }}</span>
+                <span class="status-badge small" [ngClass]="getStatusClass(delivery.status)">
+                  {{ getStatusLabel(delivery.status) }}
+                </span>
+              </div>
+              <div class="map-delivery-customer">{{ delivery.customer.name }}</div>
+              <div class="map-delivery-address">{{ delivery.customer.address }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="filteredDeliveries.length === 0">
+        <i class="fas fa-truck"></i>
+        <h3>Aucune livraison trouvée</h3>
+        <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-container" *ngIf="totalItems > 0">
+        <div class="pagination-info">
+          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
+          {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} livraisons
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="pagination-button"
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+          >
+            Précédent
+          </button>
+
+          <button
+            *ngIf="currentPage > 3"
+            class="pagination-button"
+            (click)="onPageChange(1)"
+          >
+            1
+          </button>
+
+          <span *ngIf="currentPage > 3" class="pagination-ellipsis">...</span>
+
+          <button
+            *ngFor="let page of getPageNumbers()"
+            class="pagination-button"
+            [class.active]="page === currentPage"
+            (click)="onPageChange(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span *ngIf="currentPage < getTotalPages() - 2" class="pagination-ellipsis">...</span>
+
+          <button
+            *ngIf="currentPage < getTotalPages() - 2"
+            class="pagination-button"
+            (click)="onPageChange(getTotalPages())"
+          >
+            {{ getTotalPages() }}
+          </button>
+
+          <button
+            class="pagination-button"
+            [disabled]="currentPage === getTotalPages()"
+            (click)="onPageChange(currentPage + 1)"
+          >
+            Suivant
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delivery detail modal -->
+  <div class="modal-overlay" *ngIf="isDetailModalOpen" (click)="closeDetailModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Détails de la livraison {{ selectedDelivery?.id }}</h2>
+        <button class="modal-close-button" (click)="closeDetailModal()">×</button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedDelivery">
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h3 class="section-title">Informations client</h3>
+            <div class="detail-item">
+              <span class="detail-label">Nom:</span>
+              <span class="detail-value">{{ selectedDelivery.customer.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Adresse:</span>
+              <span class="detail-value">{{ selectedDelivery.customer.address }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedDelivery.customer.phone">
+              <span class="detail-label">Téléphone:</span>
+              <span class="detail-value">{{ selectedDelivery.customer.phone }}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h3 class="section-title">Informations livraison</h3>
+            <div class="detail-item">
+              <span class="detail-label">ID:</span>
+              <span class="detail-value">{{ selectedDelivery.id }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Statut:</span>
+              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.status)">
+                {{ getStatusLabel(selectedDelivery.status) }}
               </span>
             </div>
-            
-            <div class="delivery-customer">
-              <div class="customer-name">{{ delivery.customer.name }}</div>
-              <div class="customer-address">{{ delivery.customer.address }}</div>
+            <div class="detail-item">
+              <span class="info-label">Montant:</span>
+              <span class="info-value">{{ selectedDelivery.amount }}</span>
             </div>
-            
-            <div class="delivery-info">
-              <div class="info-item">
-                <span class="info-label">Commande:</span>
-                <span class="info-value">{{ delivery.orderId }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Articles:</span>
-                <span class="info-value">{{ delivery.items }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Livraison prévue:</span>
-                <span class="info-value">{{ delivery.estimatedDelivery | date:'dd/MM/yyyy HH:mm' }}</span>
-              </div>
+            <div class="detail-item">
+              <span class="info-label">Date/Heure:</span>
+              <span class="info-value">{{ selectedDelivery.time | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
-            
-            <div class="delivery-progress">
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="getDeliveryProgress(delivery)"></div>
-              </div>
-            </div>
-            
-            <div class="delivery-agent" *ngIf="delivery.deliveryAgent">
-              <div class="agent-photo">
-                <img [src]="delivery.deliveryAgent.photo" alt="Photo du livreur">
-              </div>
-              <div class="agent-info">
-                <div class="agent-name">{{ delivery.deliveryAgent.name }}</div>
-                <div class="agent-rating">
-                    <i class="fas fa-star"></i>
-                  {{ delivery.deliveryAgent.rating }}
-                </div>
-              </div>
-            </div>
-            
-            <div class="delivery-actions">
-              <button class="action-button secondary" (click)="viewDeliveryDetails(delivery)">
-                <i class="details-icon fas fa-info-circle"></i>
-                Détails
-              </button>
-              <button class="action-button primary" (click)="openMapModal(delivery)">
-                <i class="location-icon fas fa-map-marker-alt"></i>
-                Localiser
-              </button>
+            <div class="detail-item" *ngIf="selectedDelivery.courier">
+              <span class="info-label">Livreur:</span>
+              <span class="info-value">{{ selectedDelivery.courier }}</span>
             </div>
           </div>
         </div>
-  
-        <!-- Map View -->
-        <div class="map-container" *ngIf="viewMode === 'map'">
-          <div class="map-placeholder">
-            <div class="map-overlay">
-              <h3>Vue Carte</h3>
-              <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie comme Google Maps ou Leaflet.</p>
-              <p>Dans une application réelle, vous verriez ici une carte interactive avec les emplacements des livraisons.</p>
-            </div>
-          </div>
-          
-          <div class="map-sidebar">
-            <h3 class="sidebar-title">Livraisons actives</h3>
-            <div class="map-delivery-list">
-              <div 
-                class="map-delivery-item" 
-                *ngFor="let delivery of filteredDeliveries"
-                [class.active]="selectedDelivery?.id === delivery.id"
-                (click)="selectedDelivery = delivery">
-                <div class="map-delivery-header">
-                  <span class="map-delivery-id">{{ delivery.id }}</span>
-                  <span class="status-badge small" [ngClass]="getStatusClass(delivery.status)">
-                    {{ getStatusLabel(delivery.status) }}
-                  </span>
-                </div>
-                <div class="map-delivery-customer">{{ delivery.customer.name }}</div>
-                <div class="map-delivery-address">{{ delivery.customer.address }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Empty state -->
-        <div class="empty-state" *ngIf="filteredDeliveries.length === 0">
-            <i class="fas fa-truck"></i>
-            <h3>Aucune livraison trouvée</h3>
-          <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
-        </div>
-  
-        <!-- Pagination -->
-        <div class="pagination-container" *ngIf="totalItems > 0">
-          <div class="pagination-info">
-            Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à 
-            {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} livraisons
-          </div>
-          <div class="pagination-controls">
-            <button 
-              class="pagination-button" 
-              [disabled]="currentPage === 1"
-              (click)="onPageChange(currentPage - 1)">
-              Précédent
-            </button>
-            
-            <button 
-              *ngIf="currentPage > 3"
-              class="pagination-button"
-              (click)="onPageChange(1)">
-              1
-            </button>
-            
-            <span *ngIf="currentPage > 3" class="pagination-ellipsis">...</span>
-            
-            <button 
-              *ngFor="let page of getPageNumbers()"
-              class="pagination-button"
-              [class.active]="page === currentPage"
-              (click)="onPageChange(page)">
-              {{ page }}
-            </button>
-            
-            <span *ngIf="currentPage < getTotalPages() - 2" class="pagination-ellipsis">...</span>
-            
-            <button 
-              *ngIf="currentPage < getTotalPages() - 2"
-              class="pagination-button"
-              (click)="onPageChange(getTotalPages())">
-              {{ getTotalPages() }}
-            </button>
-            
-            <button 
-              class="pagination-button" 
-              [disabled]="currentPage === getTotalPages()"
-              (click)="onPageChange(currentPage + 1)">
-              Suivant
-            </button>
-          </div>
-        </div>
-      </main>
+      </div>
+
+      <div class="modal-footer">
+        <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
+        <button class="action-button primary">Modifier le statut</button>
+      </div>
     </div>
-  
-    <!-- Delivery detail modal -->
-    <div class="modal-overlay" *ngIf="isDetailModalOpen" (click)="closeDetailModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2 class="modal-title">Détails de la livraison {{ selectedDelivery?.id }}</h2>
-          <button class="modal-close-button" (click)="closeDetailModal()">×</button>
-        </div>
-        
-        <div class="modal-body" *ngIf="selectedDelivery">
-          <div class="detail-grid">
-            <div class="detail-section">
-              <h3 class="section-title">Informations client</h3>
-              <div class="detail-item">
-                <span class="detail-label">Nom:</span>
-                <span class="detail-value">{{ selectedDelivery.customer.name }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Adresse:</span>
-                <span class="detail-value">{{ selectedDelivery.customer.address }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Téléphone:</span>
-                <span class="detail-value">{{ selectedDelivery.customer.phone }}</span>
-              </div>
+  </div>
+
+  <!-- Map modal -->
+  <div class="modal-overlay" *ngIf="isMapModalOpen" (click)="closeMapModal()">
+    <div class="modal-content map-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Localisation de la livraison {{ selectedDelivery?.id }}</h2>
+        <button class="modal-close-button" (click)="closeMapModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="map-detail-container">
+          <div class="map-detail-placeholder">
+            <div class="map-overlay">
+              <h3>Carte de livraison</h3>
+              <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie.</p>
+              <p>Dans une application réelle, vous verriez ici une carte interactive avec l'emplacement de la livraison.</p>
             </div>
-            
+          </div>
+
+          <div class="map-detail-sidebar" *ngIf="selectedDelivery">
             <div class="detail-section">
               <h3 class="section-title">Informations livraison</h3>
               <div class="detail-item">
-                <span class="detail-label">Commande:</span>
-                <span class="detail-value">{{ selectedDelivery.orderId }}</span>
+                <span class="detail-label">ID:</span>
+                <span class="detail-value">{{ selectedDelivery.id }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Statut:</span>
@@ -280,157 +333,32 @@
                 </span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Articles:</span>
-                <span class="detail-value">{{ selectedDelivery.items }}</span>
+                <span class="detail-label">Client:</span>
+                <span class="detail-value">{{ selectedDelivery.customer.name }}</span>
               </div>
-            </div>
-            
-            <div class="detail-section">
-              <h3 class="section-title">Dates</h3>
               <div class="detail-item">
-                <span class="detail-label">Prévue:</span>
-                <span class="detail-value">{{ selectedDelivery.estimatedDelivery | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="detail-label">Adresse:</span>
+                <span class="detail-value">{{ selectedDelivery.customer.address }}</span>
               </div>
-              <div class="detail-item" *ngIf="selectedDelivery.actualDelivery">
-                <span class="detail-label">Effective:</span>
-                <span class="detail-value">{{ selectedDelivery.actualDelivery | date:'dd/MM/yyyy HH:mm' }}</span>
-              </div>
-            </div>
-            
-            <div class="detail-section" *ngIf="selectedDelivery.deliveryAgent">
-              <h3 class="section-title">Livreur</h3>
-              <div class="agent-detail">
-                <div class="agent-photo large">
-                  <img [src]="selectedDelivery.deliveryAgent.photo" alt="Photo du livreur">
-                </div>
-                <div class="agent-detail-info">
-                  <div class="detail-item">
-                    <span class="detail-label">Nom:</span>
-                    <span class="detail-value">{{ selectedDelivery.deliveryAgent.name }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">Téléphone:</span>
-                    <span class="detail-value">{{ selectedDelivery.deliveryAgent.phone }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">Évaluation:</span>
-                    <span class="detail-value">
-                        <i class="fas fa-star"></i>
-                        {{ selectedDelivery.deliveryAgent.rating }}
-                    </span>
-                  </div>
-                </div>
+              <div class="detail-item" *ngIf="selectedDelivery.courier">
+                <span class="detail-label">Livreur:</span>
+                <span class="detail-value">{{ selectedDelivery.courier }}</span>
               </div>
             </div>
-            
-            <div class="detail-section full-width">
-              <h3 class="section-title">Historique de suivi</h3>
-              <div class="tracking-timeline">
-                <div class="timeline-item" *ngFor="let event of selectedDelivery.trackingHistory">
-                  <div class="timeline-marker" [ngClass]="getStatusClass(event.status)"></div>
-                  <div class="timeline-content">
-                    <div class="timeline-date">{{ event.timestamp | date:'dd/MM/yyyy HH:mm' }}</div>
-                    <div class="timeline-status">{{ getStatusLabel(event.status) }}</div>
-                    <div class="timeline-description">{{ event.description }}</div>
-                    <div class="timeline-location" *ngIf="event.location">{{ event.location }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="detail-section full-width" *ngIf="selectedDelivery.notes">
-              <h3 class="section-title">Notes</h3>
-              <div class="notes-content">
-                {{ selectedDelivery.notes }}
-              </div>
-            </div>
-            
-            <div class="detail-section full-width" *ngIf="selectedDelivery.signature">
-              <h3 class="section-title">Signature</h3>
-              <div class="signature-container">
-                <img [src]="selectedDelivery.signature" alt="Signature du client" class="signature-image">
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal-footer">
-          <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
-          <button class="action-button primary">Modifier le statut</button>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Map modal -->
-    <div class="modal-overlay" *ngIf="isMapModalOpen" (click)="closeMapModal()">
-      <div class="modal-content map-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2 class="modal-title">Localisation de la livraison {{ selectedDelivery?.id }}</h2>
-          <button class="modal-close-button" (click)="closeMapModal()">×</button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="map-detail-container">
-            <div class="map-detail-placeholder">
-              <div class="map-overlay">
-                <h3>Carte de livraison</h3>
-                <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie.</p>
-                <p>Dans une application réelle, vous verriez ici une carte interactive avec l'emplacement de la livraison.</p>
-                <div class="map-coordinates" *ngIf="selectedDelivery">
-                  <p>Coordonnées: {{ selectedDelivery.location.lat }}, {{ selectedDelivery.location.lng }}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="map-detail-sidebar" *ngIf="selectedDelivery">
-              <div class="detail-section">
-                <h3 class="section-title">Informations livraison</h3>
-                <div class="detail-item">
-                  <span class="detail-label">ID:</span>
-                  <span class="detail-value">{{ selectedDelivery.id }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Statut:</span>
-                  <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.status)">
-                    {{ getStatusLabel(selectedDelivery.status) }}
-                  </span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Client:</span>
-                  <span class="detail-value">{{ selectedDelivery.customer.name }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Adresse:</span>
-                  <span class="detail-value">{{ selectedDelivery.customer.address }}</span>
-                </div>
-              </div>
-              
-              <div class="detail-section" *ngIf="selectedDelivery.deliveryAgent">
-                <h3 class="section-title">Livreur</h3>
-                <div class="agent-detail">
-                  <div class="agent-photo">
-                    <img [src]="selectedDelivery.deliveryAgent.photo" alt="Photo du livreur">
-                  </div>
-                  <div class="agent-detail-info">
-                    <div class="agent-name">{{ selectedDelivery.deliveryAgent.name }}</div>
-                    <div class="agent-phone">{{ selectedDelivery.deliveryAgent.phone }}</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="map-actions">
-                <button class="action-button secondary">
-                  <i class="phone-icon">📞</i>
-                  Appeler
-                </button>
-                <button class="action-button primary">
-                  <i class="message-icon">💬</i>
-                  Message
-                </button>
-              </div>
+
+            <div class="map-actions">
+              <button class="action-button secondary">
+                <i class="phone-icon">📞</i>
+                Appeler
+              </button>
+              <button class="action-button primary">
+                <i class="message-icon">💬</i>
+                Message
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
