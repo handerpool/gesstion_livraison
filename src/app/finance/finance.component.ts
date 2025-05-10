@@ -13,8 +13,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   styleUrl: './finance.component.css'
 })
 export class FinanceComponent implements OnInit {
-  @ViewChild('revenueChart')
-  revenueChartCanvas!: ElementRef;
+  @ViewChild('revenueChart') revenueChartCanvas!: ElementRef;
   
   transactions: Transaction[] = [];
   filteredTransactions: Transaction[] = [];
@@ -44,7 +43,7 @@ export class FinanceComponent implements OnInit {
     return [
       {
         id: 1,
-        date: new Date(2023, 4, 15),
+        date: new Date(2025, 3, 15),
         clientId: 1,
         clientName: 'Acme Corporation',
         type: 'payment',
@@ -55,7 +54,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 2,
-        date: new Date(2023, 4, 18),
+        date: new Date(2024, 12, 18),
         clientId: 2,
         clientName: 'TechStart SAS',
         type: 'payment',
@@ -66,7 +65,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 3,
-        date: new Date(2023, 4, 20),
+        date: new Date(2025, 4, 20),
         clientId: 3,
         clientName: 'Gourmet Deliveries',
         type: 'payment',
@@ -77,7 +76,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 4,
-        date: new Date(2023, 4, 22),
+        date: new Date(2025, 4, 22),
         clientId: 1,
         clientName: 'Acme Corporation',
         type: 'refund',
@@ -89,7 +88,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 5,
-        date: new Date(2023, 4, 25),
+        date: new Date(2025, 3, 25),
         clientId: 4,
         clientName: 'Fashion Boutique',
         type: 'payment',
@@ -101,7 +100,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 6,
-        date: new Date(2023, 4, 28),
+        date: new Date(2025, 1, 28),
         clientId: 5,
         clientName: 'Green Gardens',
         type: 'payment',
@@ -112,7 +111,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 7,
-        date: new Date(2023, 5, 2),
+        date: new Date(2025, 5, 2),
         clientId: 2,
         clientName: 'TechStart SAS',
         type: 'charge',
@@ -124,7 +123,7 @@ export class FinanceComponent implements OnInit {
       },
       {
         id: 8,
-        date: new Date(2023, 5, 5),
+        date: new Date(2025, 4, 5),
         clientId: 3,
         clientName: 'Gourmet Deliveries',
         type: 'payment',
@@ -164,7 +163,7 @@ export class FinanceComponent implements OnInit {
     
     // Fill in actual data
     completedPayments.forEach(payment => {
-      const monthKey = `${payment.date.getFullYear()}-${payment.date.getMonth() + 1}`;
+      const monthKey = `${payment.date.getFullYear()}-${payment.date.getMonth() + 1 }`;
       if (monthlyData[monthKey] !== undefined) {
         monthlyData[monthKey] += payment.amount;
       }
@@ -174,7 +173,7 @@ export class FinanceComponent implements OnInit {
     const monthlyRevenue: MonthlyRevenue[] = Object.entries(monthlyData).map(([key, value]) => {
       const [year, month] = key.split('-').map(Number);
       const date = new Date(year, month - 1, 1);
-      return {
+      return {  
         month: date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }),
         revenue: value
       };

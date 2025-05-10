@@ -49,4 +49,26 @@ export class OrderService {
         })
       );
   }
+
+
+  getOrderById(id: number | string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/${id}`);
+  }
+  
+  createOrder(orderData: any): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}`, orderData);
+  }
+  
+  updateOrder(id: number | string, orderData: any): Observable<Order> {
+    return this.http.put<Order>(`${this.apiUrl}/${id}`, orderData);
+  }
+  
+  deleteOrder(id: number | string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+  
+  // Method for generating QR code (using your existing backend)
+  generateQrCode(orderId: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${orderId}/qrcode`);
+  }
 }
