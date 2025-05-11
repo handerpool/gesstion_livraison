@@ -57,34 +57,24 @@ export class SidebarComponent implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    // Set active menu item based on current route
     this.setActiveMenuItem(this.router.url);
-    
-    // Subscribe to router events to update active menu item
     this.router.events.subscribe(() => {
       this.setActiveMenuItem(this.router.url);
     });
   }
 
   navigate(route: string, index: number): void {
-    // Update active state
     this.menuItems.forEach(item => item.active = false);
     this.menuItems[index].active = true;
-    
-    // Navigate to the route
     this.router.navigate([route]);
   }
 
   private setActiveMenuItem(currentRoute: string): void {
-    // Reset all active states
     this.menuItems.forEach(item => item.active = false);
-    
-    // Find and set the active menu item
     const activeItem = this.menuItems.find(item => currentRoute.startsWith(item.route));
     if (activeItem) {
       activeItem.active = true;
     } else {
-      // Default to dashboard if no match
       this.menuItems[0].active = true;
     }
   }

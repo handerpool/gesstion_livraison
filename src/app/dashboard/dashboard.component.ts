@@ -20,7 +20,7 @@ import { DeliveryService } from '../services/delivery.service';
 })
 export class DashboardComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
-  isBrowser = isPlatformBrowser(this.platformId); // Check if we're in a browser environment
+  isBrowser = isPlatformBrowser(this.platformId);
 
   // Lazy load chart components only in browser
   deliveryStatusChart = this.isBrowser
@@ -38,7 +38,7 @@ export class DashboardComponent implements OnInit {
   selectedTab: string = 'all';
 
   recentDeliveries: Commande[] = [];
-  topLocations: Client[] = []; // Change to Client[]
+  topLocations: Client[] = [];
 
   private deliveryService = inject(DeliveryService);
 

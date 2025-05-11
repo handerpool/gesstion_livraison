@@ -1,5 +1,4 @@
-import { Transaction } from './transaction.model'; // تأكد من المسار الصحيح
-
+import { Transaction } from './transaction.model';
 export interface FinancialSummary {
     totalRevenue: number;
     pendingPayments: number;

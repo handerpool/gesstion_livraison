@@ -6,7 +6,7 @@ export interface Client {
   tlf: string;
   adresse: string;
   codePostale: string;
-  statut: 'client' | 'commercant' | 'livreur'; // Match the enum from the database
+  statut: 'client' | 'commercant' | 'livreur';
 }
 
 export interface Produit {

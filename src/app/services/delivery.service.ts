@@ -12,7 +12,7 @@ import { FinancialSummary } from '../models/financial-summary.model';
 export class DeliveryService {
   private apiUrl = 'http://localhost:8081/api';
 
-  constructor(private http: HttpClient ) {}
+  constructor(private http: HttpClient) {}
 
   getDeliveries(
     page: number,
@@ -32,8 +32,8 @@ export class DeliveryService {
 
     return this.http.get<CommandeResponse>(`${this.apiUrl}/orders`, { params }).pipe(
       catchError((err) => {
-        console.error('خطأ في جلب التوصيلات:', err);
-        return throwError(() => new Error('فشل في جلب التوصيلات'));
+        console.error('Erreur lors de la récupération des livraisons:', err);
+        return throwError(() => new Error('Échec de la récupération des livraisons'));
       })
     );
   }
@@ -43,8 +43,8 @@ export class DeliveryService {
       .put<Commande>(`${this.apiUrl}/commandes/${id}/statut/${statut}`, {})
       .pipe(
         catchError((err) => {
-          console.error('خطأ في تحديث حالة التوصيل:', err);
-          return throwError(() => new Error('فشل في تحديث حالة التوصيل'));
+          console.error('Erreur lors de la mise à jour du statut de la livraison:', err);
+          return throwError(() => new Error('Échec de la mise à jour du statut de la livraison'));
         })
       );
   }
@@ -54,8 +54,8 @@ export class DeliveryService {
       .get<Client[]>(`${this.apiUrl}/dashboard/clients/top?page=${page}&size=${size}`)
       .pipe(
         catchError((err) => {
-          console.error('خطأ في جلب أفضل العملاء:', err);
-          return throwError(() => new Error('فشل في جلب أفضل العملاء'));
+          console.error('Erreur lors de la récupération des meilleurs clients:', err);
+          return throwError(() => new Error('Échec de la récupération des meilleurs clients'));
         })
       );
   }
@@ -65,8 +65,8 @@ export class DeliveryService {
       .get<Commande[]>(`${this.apiUrl}/dashboard/commandes/recent?page=${page}&size=${size}`)
       .pipe(
         catchError((err) => {
-          console.error('خطأ في جلب التوصيلات الأخيرة:', err);
-          const errorMessage = err.error?.error || 'فشل في جلب التوصيلات الأخيرة. تحقق من الخادم.';
+          console.error('Erreur lors de la récupération des livraisons récentes:', err);
+          const errorMessage = err.error?.error || 'Échec de la récupération des livraisons récentes. Vérifiez le serveur.';
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -75,8 +75,8 @@ export class DeliveryService {
   getDeliveryStats(): Observable<DeliveryStats> {
     return this.http.get<DeliveryStats>(`${this.apiUrl}/dashboard/commandes/stats`).pipe(
       catchError((err) => {
-        console.error('خطأ في جلب إحصائيات التوصيل:', err);
-        return throwError(() => new Error('فشل في جلب إحصائيات التوصيل'));
+        console.error('Erreur lors de la récupération des statistiques de livraison:', err);
+        return throwError(() => new Error('Échec de la récupération des statistiques de livraison'));
       })
     );
   }
@@ -84,8 +84,8 @@ export class DeliveryService {
   getStatsCards(): Observable<StatsCard[]> {
     return this.http.get<StatsCard[]>(`${this.apiUrl}/dashboard/stats/cards`).pipe(
       catchError((err) => {
-        console.error('خطأ في جلب بطاقات الإحصائيات:', err);
-        return throwError(() => new Error('فشل في جلب بطاقات الإحصائيات'));
+        console.error('Erreur lors de la récupération des cartes de statistiques:', err);
+        return throwError(() => new Error('Échec de la récupération des cartes de statistiques'));
       })
     );
   }
@@ -93,8 +93,8 @@ export class DeliveryService {
   createOrder(orderData: Commande): Observable<Commande> {
     return this.http.post<Commande>(`${this.apiUrl}/orders`, orderData).pipe(
       catchError((err) => {
-        console.error('خطأ في إنشاء الطلب:', err);
-        return throwError(() => new Error('فشل في إنشاء الطلب'));
+        console.error('Erreur lors de la création de la commande:', err);
+        return throwError(() => new Error('Échec de la création de la commande'));
       })
     );
   }
@@ -117,8 +117,8 @@ export class DeliveryService {
 
     return this.http.get<CommandeResponse>(`${this.apiUrl}/orders`, { params }).pipe(
       catchError((err) => {
-        console.error('خطأ في جلب الطلبات:', err);
-        return throwError(() => new Error('فشل في جلب الطلبات'));
+        console.error('Erreur lors de la récupération des commandes:', err);
+        return throwError(() => new Error('Échec de la récupération des commandes'));
       })
     );
   }
@@ -126,36 +126,39 @@ export class DeliveryService {
   getDeliveryAgents(): Observable<{ id: string; name: string }[]> {
     return this.http.get<{ id: string; name: string }[]>(`${this.apiUrl}/delivery-agents`).pipe(
       catchError((err) => {
-        console.error('خطأ في جلب وكلاء التوصيل:', err);
-        return throwError(() => new Error('فشل في جلب وكلاء التوصيل'));
+        console.error('Erreur lors de la récupération des agents de livraison:', err);
+        return throwError(() => new Error('Échec de la récupération des agents de livraison'));
       })
     );
   }
 
   getFinancialSummary(): Observable<FinancialSummary> {
-        return this.http.get<FinancialSummary>(`${this.apiUrl}/finance/summary`).pipe(
-            catchError((err) => {
-                console.error('خطأ في جلب البيانات المالية:', err);
-                return throwError(() => new Error('فشل في جلب البيانات المالية'));
-            })
-        );
-    }
+    return this.http.get<FinancialSummary>(`${this.apiUrl}/finance/summary`).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de la récupération des données financières:', err);
+        return throwError(() => new Error('Échec de la récupération des données financières'));
+      })
+    );
+  }
+
   getDeliveryZones(): Observable<DeliveryZonesResponse> {
-        return this.http.get<DeliveryZonesResponse>(`${this.apiUrl}/dashboard/delivery-zones`).pipe(
-            catchError((err) => {
-                console.error('خطأ في جلب مناطق التوصيل:', err);
-                return throwError(() => new Error('فشل في جلب مناطق التوصيل'));
-            })
-        );
-    }
+    return this.http.get<DeliveryZonesResponse>(`${this.apiUrl}/dashboard/delivery-zones`).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de la récupération des zones de livraison:', err);
+        return throwError(() => new Error('Échec de la récupération des zones de livraison'));
+      })
+    );
+  }
 }
+
 interface DeliveryZone {
-    city: string;
-    postalCode: string;
-    address: string;
-    orderCount: number;
+  city: string;
+  postalCode: string;
+  address: string;
+  orderCount: number;
 }
+
 interface DeliveryZonesResponse {
-    deliveryZones: DeliveryZone[];
-    mostActiveZone: DeliveryZone;
+  deliveryZones: DeliveryZone[];
+  mostActiveZone: DeliveryZone;
 }

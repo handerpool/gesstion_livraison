@@ -82,6 +82,6 @@ export interface AvisLivreur {
 }
 
 export interface DashboardL {
-    livreur?: Livreur; // جعل الحقل اختياريًا لتجنب الخطأ
+    livreur?: Livreur;
     commande: Commande;
 }

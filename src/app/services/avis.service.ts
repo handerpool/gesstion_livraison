@@ -13,7 +13,7 @@ export class AvisService {
   constructor(private http: HttpClient) {}
 
   createAvis(avis: AvisProduit): Observable<AvisProduit> {
-    avis.date = new Date().toISOString(); // Ensure date is in ISO 8601 format
+    avis.date = new Date().toISOString();
     return this.http.post<AvisProduit>(this.apiUrl, avis).pipe(
       catchError((err) => {
         console.error('Error creating avis:', err);

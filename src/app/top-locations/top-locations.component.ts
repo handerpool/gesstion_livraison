@@ -30,7 +30,7 @@ export class TopLocationsComponent implements OnChanges {
     if (changes['locations'] && changes['locations'].currentValue?.length > 0) {
         this.updateActiveZone();
     } else {
-        console.log('البيانات غير متوفرة أو فارغة');
+        console.log('Les données ne sont pas disponibles ou sont vides.');
     }
 }
     private updateActiveZone(): void {
@@ -39,7 +39,6 @@ export class TopLocationsComponent implements OnChanges {
             return;
         }
         
-        // Find the city with the most orders
         this.activeZone = this.cityLocations.reduce(
             (max, location) => 
                 location.count > max.count ? location : max,

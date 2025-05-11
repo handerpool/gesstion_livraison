@@ -53,7 +53,7 @@ export class FinanceComponent implements OnInit {
                 this.filteredTransactions = [...this.transactions];
                 this.initRevenueChart();
             },
-            error: (err) => console.error('خطأ في جلب البيانات المالية:', err)
+            error: (err) => console.error('Erreur lors de la récupération des données financières :', err)
         });
     }
 
@@ -65,7 +65,7 @@ export class FinanceComponent implements OnInit {
 
 
         if (this.revenueChart) {
-            this.revenueChart.destroy(); // Prevent canvas reuse issues
+            this.revenueChart.destroy();
         }
 
         const chartConfig: ChartConfiguration = {
@@ -73,7 +73,7 @@ export class FinanceComponent implements OnInit {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'الإيرادات الشهرية (د.ت)',
+                    label: 'Revenus mensuels (DT)',
                     data: data,
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -87,7 +87,7 @@ export class FinanceComponent implements OnInit {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return value + ' د.ت';
+                                return value + ' DT';
                             }
                         }
                     }

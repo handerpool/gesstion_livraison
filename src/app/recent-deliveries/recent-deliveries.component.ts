@@ -15,19 +15,17 @@ export class RecentDeliveriesComponent implements OnInit {
   @Output() tabChange = new EventEmitter<string>();
 
   tabs = [
-    { value: 'all', label: 'الكل' },
-    { value: 'livré', label: 'تم التوصيل' },
-    { value: 'en_attente', label: 'في الانتظار' },
-    { value: 'annulé', label: 'ملغى' },
+    { value: 'all', label: 'Tous' },
+    { value: 'livré', label: 'Livré' },
+    { value: 'en_attente', label: 'En attente' },
+    { value: 'annulé', label: 'Annulé' },
   ];
 
   ngOnInit(): void {
-    // Add debugging logs
-    console.log('البيانات المستلمة:', this.deliveries);
+    console.log('Données reçues:', this.deliveries);
     this.deliveries.forEach(delivery => 
       console.log('Commande ID:', delivery.idCmd, 'Client:', delivery.client)
     );
-    
   }
 
   onTabChange(tab: string): void {
@@ -48,10 +46,10 @@ export class RecentDeliveriesComponent implements OnInit {
         return 'status-delivered';
       case 'en_attente':
         return 'status-pending';
-      case 'annulé':  // Make sure this case exists
+      case 'annulé':
         return 'status-cancelled';
       default:
-        console.warn('Unknown status:', status);
+        console.warn('Statut inconnu:', status);
         return '';
     }
   }
@@ -60,29 +58,28 @@ export class RecentDeliveriesComponent implements OnInit {
     switch (status) {
       case 'livré':
       case 'livre':
-        return 'تم التوصيل';
+        return 'Livré';
       case 'en_attente':
-        return 'في الانتظار';
+        return 'En attente';
       case 'annulé':
-        return 'ملغى';
+        return 'Annulé';
       default:
-        console.warn('Unknown status:', status);
-        return 'غير محدد';
+        console.warn('Statut inconnu:', status);
+        return 'Non défini';
     }
   }
 
   getCustomerName(delivery: Commande): string {
-    // Add extra logging to debug client data
     if (!delivery.client) {
-      console.log('Client missing for delivery:', delivery.idCmd);
-      return 'غير متوفر';
+      console.log('Client manquant pour la livraison:', delivery.idCmd);
+      return 'Non disponible';
     }
     
     if (delivery.client && delivery.client.nom && delivery.client.prenom) {
       return `${delivery.client.nom} ${delivery.client.prenom}`;
     }
     
-    console.log('Incomplete client data for delivery:', delivery.idCmd, 'Client:', delivery.client);
-    return 'غير متوفر';
+    console.log('Données client incomplètes pour la livraison:', delivery.idCmd, 'Client:', delivery.client);
+    return 'Non disponible';
   }
 }

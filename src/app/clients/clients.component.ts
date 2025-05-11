@@ -45,7 +45,6 @@ export class ClientsComponent implements OnInit {
   applyFilters(): void {
     let filtered = [...this.clients];
 
-    // تصفية حسب البحث
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -56,7 +55,6 @@ export class ClientsComponent implements OnInit {
       );
     }
 
-    // تصفية حسب الحالة
     if (this.statusFilter !== 'all') {
       filtered = filtered.filter(
         (client) =>
@@ -65,7 +63,6 @@ export class ClientsComponent implements OnInit {
       );
     }
 
-    // الفرز
     filtered.sort((a, b) => {
       let comparison = 0;
       switch (this.sortBy) {

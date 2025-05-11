@@ -88,21 +88,17 @@ export class SettingsComponent {
 
   toggleNotification(setting: NotificationSetting): void {
     setting.enabled = !setting.enabled;
-    // In a real app, this would be saved to a backend
   }
 
   saveProfile(): void {
-    // In a real app, this would save to a backend
     alert('Profil mis à jour avec succès');
   }
 
   saveDisplaySettings(): void {
-    // In a real app, this would save to a backend
     alert('Paramètres d\'affichage mis à jour avec succès');
   }
 
   saveSecuritySettings(): void {
-    // In a real app, this would save to a backend
     alert('Paramètres de sécurité mis à jour avec succès');
   }
 }

@@ -1,8 +1,5 @@
 <div class="deliveries-container">
-  <!-- Sidebar -->
   <app-sidebar></app-sidebar>
-
-  <!-- Main content -->
   <div class="main-content">
     <header class="deliveries-header">
       <div>
@@ -35,7 +32,6 @@
     </header>
 
     <main class="deliveries-main">
-      <!-- Filters -->
       <div class="filters-container">
         <div class="filter-group">
           <label for="status-filter">Statut:</label>
@@ -96,7 +92,6 @@
         </div>
       </div>
 
-      <!-- List View -->
       <div class="deliveries-grid" *ngIf="viewMode === 'list'" role="list">
         <div class="delivery-card" 
              *ngFor="let commande of commandes; trackBy: trackById"
@@ -122,11 +117,8 @@
           <button class="action-btn view-btn" (click)="viewDeliveryDetails(commande)" aria-label="Voir les détails">Détails</button>
         </div>
       </div>
-
-      <!-- Map View -->
       <div class="map-container" *ngIf="viewMode === 'map'">
         <div class="map-placeholder" id="map">
-          <!-- Simplified loading message -->
           <div class="map-overlay" *ngIf="!mapInitialized">
             <h3>Chargement de la carte...</h3>
           </div>
@@ -154,14 +146,12 @@
         </div>
       </div>
 
-      <!-- Empty state -->
       <div class="empty-state" *ngIf="filteredDeliveries.length === 0">
         <i class="fas fa-truck"></i>
         <h3>Aucune livraison trouvée</h3>
         <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
       </div>
 
-      <!-- Pagination -->
       <div class="pagination-container" *ngIf="totalItems > 0">
         <div class="pagination-info">
           Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
@@ -217,7 +207,6 @@
     </main>
   </div>
 
-  <!-- Delivery detail modal -->
   <div class="modal-overlay" 
        *ngIf="isDetailModalOpen" 
        role="dialog"
@@ -284,7 +273,6 @@
     </div>
   </div>
 
-  <!-- Map modal -->
   <div class="modal-overlay" 
        *ngIf="isMapModalOpen" 
        role="dialog"
@@ -332,7 +320,7 @@
               <div class="detail-item" *ngIf="selectedDelivery.dashboardL?.livreur?.nom">
                 <span class="detail-label">Livreur:</span>
                 <span class="detail-value">
-                  {{ selectedDelivery.dashboardL?.livreur?.nom || 'غير معين' }}
+                  {{ selectedDelivery.dashboardL?.livreur?.nom || 'Indéfini' }}
                 </span>
               </div>
             </div>

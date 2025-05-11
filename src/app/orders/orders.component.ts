@@ -26,7 +26,7 @@ export class OrdersComponent implements OnInit {
   selectedOrder: Commande | null = null;
   isDetailModalOpen: boolean = false;
   
-  // New order form properties
+  // Propriétés du formulaire de nouvelle commande
   isNewOrderModalOpen: boolean = false;
   isQrCodeModalOpen: boolean = false;
   qrCodeData: string = '';
@@ -49,17 +49,17 @@ export class OrdersComponent implements OnInit {
   totalPages: number = 0;
   
   statusOptions = [
-    { value: 'all', label: 'كل الحالات' },
-    { value: 'en_attente', label: 'في الانتظار' },
-    { value: 'livré', label: 'تم التوصيل' },
-    { value: 'annulé', label: 'ملغى' },
+    { value: 'all', label: 'Tous les statuts' },
+    { value: 'en_attente', label: 'En attente' },
+    { value: 'livré', label: 'Livré' },
+    { value: 'annulé', label: 'Annulé' },
   ];
   
   sortOptions = [
-    { value: 'dateCmd', label: 'التاريخ' },
-    { value: 'idCmd', label: 'رقم الطلب' },
-    { value: 'client', label: 'العميل' },
-    { value: 'prixTotale', label: 'المبلغ' },
+    { value: 'dateCmd', label: 'Date' },
+    { value: 'idCmd', label: 'Numéro de commande' },
+    { value: 'client', label: 'Client' },
+    { value: 'prixTotale', label: 'Montant' },
   ];
 
   constructor(private deliveryService: DeliveryService) {}
@@ -74,11 +74,11 @@ export class OrdersComponent implements OnInit {
       this.itemsPerPage,
       this.selectedStatus,
       this.searchTerm,
-      '', // date parameter
-      'all' // agent parameter
+      '', // paramètre de date
+      'all' // paramètre d'agent
     ).subscribe({
       next: (response: CommandeResponse) => {
-        console.log('استجابة API:', JSON.stringify(response, null, 2));
+        console.log('Réponse API:', JSON.stringify(response, null, 2));
         this.orders = response.commandes || [];
         this.filteredOrders = [...this.orders];
         this.totalItems = response.totalItems || this.orders.length;
@@ -87,11 +87,11 @@ export class OrdersComponent implements OnInit {
         this.applyFilters();
       },
       error: (err) => {
-        console.error('خطأ في جلب الطلبات:', err);
+        console.error('Erreur lors de la récupération des commandes:', err);
         this.filteredOrders = [];
         this.totalItems = 0;
         this.totalPages = 0;
-        alert('خطأ أثناء تحميل الطلبات. الرجاء المحاولة مرة أخرى.');
+        alert('Erreur lors du chargement des commandes. Veuillez réessayer.');
       },
     });
   }
@@ -129,12 +129,12 @@ export class OrdersComponent implements OnInit {
   applyFilters(): void {
     let filtered = [...this.orders];
 
-    // Filter by status
+    // Filtrer par statut
     if (this.selectedStatus !== 'all') {
       filtered = filtered.filter(order => order.statut === this.selectedStatus);
     }
 
-    // Filter by search term
+    // Filtrer par terme de recherche
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(order =>
@@ -144,7 +144,7 @@ export class OrdersComponent implements OnInit {
       );
     }
 
-    // Sorting
+    // Tri
     filtered.sort((a, b) => {
       let comparison = 0;
       switch (this.sortBy) {
@@ -157,7 +157,7 @@ export class OrdersComponent implements OnInit {
           );
           break;
         case 'dateCmd':
-          comparison = new Date(a.dateCmd).getTime() - new Date(b.dateCmd).getTime(); // Handle dateCmd as string
+          comparison = new Date(a.dateCmd).getTime() - new Date(b.dateCmd).getTime();
           break;
         case 'prixTotale':
           comparison = (a.prixTotale ?? 0) - (b.prixTotale ?? 0);
@@ -203,13 +203,13 @@ export class OrdersComponent implements OnInit {
   getStatusLabel(statut?: string): string {
     switch (statut) {
       case 'en_attente':
-        return 'في الانتظار';
+        return 'En attente';
       case 'livré':
-        return 'تم التوصيل';
+        return 'Livré';
       case 'annulé':
-        return 'ملغى';
+        return 'Annulé';
       default:
-        return 'غير معروف';
+        return 'Inconnu';
     }
   }
 
@@ -237,14 +237,14 @@ export class OrdersComponent implements OnInit {
 
   getDisplayRange(): string {
     if (this.totalItems === 0) {
-      return 'عرض من 0 إلى 0 من 0 طلبات';
+      return 'Affichage de 0 à 0 sur 0 commandes';
     }
     const start = (this.currentPage - 1) * this.itemsPerPage + 1;
     const end = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
-    return `عرض من ${start} إلى ${end} من ${this.totalItems} طلبات`;
+    return `Affichage de ${start} à ${end} sur ${this.totalItems} commandes`;
   }
   
-  // New order methods
+  // Méthodes pour les nouvelles commandes
   openNewOrderModal(): void {
     this.resetNewOrderForm();
     this.isNewOrderModalOpen = true;
@@ -270,14 +270,14 @@ export class OrdersComponent implements OnInit {
   
   calculateTotal(): string {
     const total = (this.newOrder.quantity || 1) * (this.newOrder.prixUnitaire || 0);
-    return total.toFixed(2) + ' د.ت';
+    return total.toFixed(2) + ' D.T';
   }
   
   submitNewOrder(): void {
     const orderData: Commande = {
-      idCmd: 0, // سيتم تجاهله بواسطة الخادم
+      idCmd: 0,
       client: {
-        idUser: 0, // يفترض أن الخادم ينشئ العميل أو يربطه
+        idUser: 0,
         nom: this.newOrder.client!.nom,
         prenom: this.newOrder.client!.prenom,
         email: this.newOrder.client!.email,
@@ -290,7 +290,7 @@ export class OrdersComponent implements OnInit {
       dateCmd: this.newOrder.dateCmd!,
       estpayee: this.newOrder.estpayee!,
       produit: {
-        idProd: 0, // يفترض أن الخادم ينشئ المنتج أو يربطه
+        idProd: 0,
         nomProd: this.newOrder.produit!.nomProd,
         prix: this.newOrder.prixUnitaire!,
       } as Produit,
@@ -311,8 +311,8 @@ export class OrdersComponent implements OnInit {
         this.loadOrders();
       },
       error: (err) => {
-        console.error('خطأ في إنشاء الطلب:', err);
-        alert('خطأ أثناء إنشاء الطلب.');
+        console.error('Erreur lors de la création de la commande:', err);
+        alert('Erreur lors de la création de la commande.');
       },
     });
   }
@@ -341,7 +341,7 @@ export class OrdersComponent implements OnInit {
     windowPrint.document.write(`
       <html>
         <head>
-          <title>رمز QR - الطلب</title>
+          <title>Code QR - Commande</title>
           <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             .qr-container { margin: 20px auto; }

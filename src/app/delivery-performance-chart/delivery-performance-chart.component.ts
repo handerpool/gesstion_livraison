@@ -79,7 +79,6 @@ export class DeliveryPerformanceChartComponent {
   }
 
   updateChartData(): void {
-    // In a real app, you would fetch data based on the selected period
     if (this.selectedPeriod === 'day') {
       this.barChartData.labels = ['8h', '10h', '12h', '14h', '16h', '18h', '20h'];
     } else if (this.selectedPeriod === 'week') {

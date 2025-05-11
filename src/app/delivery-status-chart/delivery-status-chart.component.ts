@@ -53,16 +53,16 @@ export class DeliveryStatusChartComponent implements OnInit {
   fetchDeliveryStats(): void {
     this.deliveryService.getDeliveryStats().subscribe({
       next: (data: DeliveryStats) => {
-        console.log('Received stats:', data); // Log data for verification
+        console.log('Received stats:', data);
         this.errorMessage = null;
         const statusMap: { [key: string]: number } = {
-          'livré': 0,    // Matches backend response
-          'en_cours': 1, // Matches backend response
-          'en_attente': 2, // Matches backend response
-          'annulé': 3,   // Add this mapping for cancelled status
+          'livré': 0,    
+          'en_cours': 1,
+          'en_attente': 2,
+          'annulé': 3,
         };
 
-        const newData = [0, 0, 0, 0]; // Initialize with zeros (now 4 elements)
+        const newData = [0, 0, 0, 0];
         const newStatusItems = [...this.statusItems];
 
         for (const [status, stats] of Object.entries(data)) {
@@ -82,7 +82,7 @@ export class DeliveryStatusChartComponent implements OnInit {
         this.statusItems = newStatusItems;
       },
       error: (err) => {
-        this.errorMessage = 'فشل في جلب إحصائيات التوصيل. حاول مرة أخرى لاحقًا.';
+        this.errorMessage = 'Échec de la récupération des statistiques de livraison. Veuillez réessayer plus tard.';
         console.error('Error fetching stats:', err);
       },
     });

@@ -33,10 +33,10 @@
       </div>
       <div class="delivery-details">
         <p class="delivery-amount">
-          {{ delivery.prixTotale ? delivery.prixTotale + ' DTN' : 'غير متاح' }}
+          {{ delivery.prixTotale ? delivery.prixTotale + ' DTN' : 'Non disponible' }}
         </p>
         <p class="delivery-courier">
-          {{ delivery.dashboardL?.livreur?.nom || 'غير معين' }}
+          {{ delivery.dashboardL?.livreur?.nom || 'Non assigné' }}
         </p>
       </div>
       <button class="delivery-actions-button">
