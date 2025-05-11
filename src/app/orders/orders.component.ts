@@ -26,7 +26,6 @@ export class OrdersComponent implements OnInit {
   selectedOrder: Commande | null = null;
   isDetailModalOpen: boolean = false;
   
-  // Propriétés du formulaire de nouvelle commande
   isNewOrderModalOpen: boolean = false;
   isQrCodeModalOpen: boolean = false;
   qrCodeData: string = '';
@@ -74,8 +73,8 @@ export class OrdersComponent implements OnInit {
       this.itemsPerPage,
       this.selectedStatus,
       this.searchTerm,
-      '', // paramètre de date
-      'all' // paramètre d'agent
+      '', 
+      'all' 
     ).subscribe({
       next: (response: CommandeResponse) => {
         console.log('Réponse API:', JSON.stringify(response, null, 2));
@@ -129,12 +128,11 @@ export class OrdersComponent implements OnInit {
   applyFilters(): void {
     let filtered = [...this.orders];
 
-    // Filtrer par statut
+  
     if (this.selectedStatus !== 'all') {
       filtered = filtered.filter(order => order.statut === this.selectedStatus);
     }
 
-    // Filtrer par terme de recherche
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(order =>
@@ -144,7 +142,6 @@ export class OrdersComponent implements OnInit {
       );
     }
 
-    // Tri
     filtered.sort((a, b) => {
       let comparison = 0;
       switch (this.sortBy) {
@@ -166,7 +163,6 @@ export class OrdersComponent implements OnInit {
       return this.sortDirection === 'asc' ? comparison : -comparison;
     });
 
-    // Pagination
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
     this.filteredOrders = filtered.slice(start, end);
@@ -244,7 +240,6 @@ export class OrdersComponent implements OnInit {
     return `Affichage de ${start} à ${end} sur ${this.totalItems} commandes`;
   }
   
-  // Méthodes pour les nouvelles commandes
   openNewOrderModal(): void {
     this.resetNewOrderForm();
     this.isNewOrderModalOpen = true;

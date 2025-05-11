@@ -30,7 +30,7 @@ export interface Commande {
   adresse: string;
   codePostale: string;
   statut: 'annulé' | 'en_attente' | 'livré';
-  dateCmd: string | Date; // Support both string and Date
+  dateCmd: string | Date;
   estpayee: boolean;
   produit?: {
     idProd: number;

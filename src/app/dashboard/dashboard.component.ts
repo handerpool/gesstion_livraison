@@ -22,7 +22,6 @@ export class DashboardComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   isBrowser = isPlatformBrowser(this.platformId);
 
-  // Lazy load chart components only in browser
   deliveryStatusChart = this.isBrowser
     ? import('../delivery-status-chart/delivery-status-chart.component').then(m => m.DeliveryStatusChartComponent)
     : Promise.resolve(null);
