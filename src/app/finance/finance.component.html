@@ -1,134 +1,131 @@
-<div class="dashboard-container">  <!-- Keep the same class for consistent layout -->
+<div class="dashboard-container">
     <app-sidebar></app-sidebar>
-  
+
     <div class="main-content">
-<div class="finance-container">
+        <div class="finance-container">
+            <div class="finance-header">
+                <h1>Finances</h1>
+            </div>
 
-    <div class="finance-header">
-      <h1>Finances</h1>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="card-icon revenue-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Revenu total</h3>
+                        <p class="card-value">{{ formatCurrency(financialSummary.totalRevenue) }}</p>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon pending-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Paiements en attente</h3>
+                        <p class="card-value">{{ formatCurrency(financialSummary.pendingPayments) }}</p>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon transaction-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Transactions</h3>
+                        <p class="card-value">{{ financialSummary.transactionCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="finance-charts">
+                <div class="chart-container">
+                    <h2>Revenu mensuel</h2>
+                    <canvas #revenueChart></canvas>
+                </div>
+            </div>
+
+            <div class="transactions-section">
+                <div class="section-header">
+                    <h2>Transactions</h2>
+                    <div class="filter-controls">
+                        <div class="search-box">
+                            <input
+                                type="text"
+                                [(ngModel)]="searchTerm"
+                                (input)="applyFilters()"
+                                placeholder="Rechercher..."
+                            >
+                            <i class="fas fa-search"></i>
+                        </div>
+
+                        <select [(ngModel)]="dateFilter" (change)="applyFilters()">
+                            <option value="all">Toutes les dates</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                        </select>
+
+                        <select [(ngModel)]="typeFilter" (change)="applyFilters()">
+                            <option value="all">Tous les types</option>
+                            <option value="payment">Paiements</option>
+                            <option value="refund">Remboursements</option>
+                            <option value="charge">Frais</option>
+                        </select>
+
+                        <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+                            <option value="all">Tous les statuts</option>
+                            <option value="livré">Complétés</option>
+                            <option value="en_attente">En attente</option>
+                            <option value="annulé">Annulés</option>
+                        </select>
+
+                        <button class="reset-btn" (click)="resetFilters()">
+                            <i class="fas fa-redo"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
+                <div class="transactions-table-container">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Référence</th>
+                                <th>Client</th>
+                                <th>Type</th>
+                                <th>Montant</th>
+                                <th>Méthode</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let transaction of filteredTransactions">
+                                <td>{{ transaction.date | date:'dd/MM/yyyy' }}</td>
+                                <td>{{ transaction.reference }}</td>
+                                <td>{{ transaction.clientName }}</td>
+                                <td>
+                                    <span class="transaction-type" [ngClass]="getTypeClass(transaction.type)">
+                                        {{ transaction.type === 'payment' ? 'Paiement' :
+                                           transaction.type === 'refund' ? 'Remboursement' : 'Frais' }}
+                                    </span>
+                                </td>
+                                <td [ngClass]="{'amount-positive': transaction.type === 'payment', 'amount-negative': transaction.type === 'refund'}">
+                                    {{ formatCurrency(transaction.amount) }}
+                                </td>
+                                <td>{{ transaction.paymentMethod }}</td>
+                                <td>
+                                    <span class="transaction-status" [ngClass]="getStatusClass(transaction.status)">
+                                        {{ transaction.status === 'livré' ? 'Complété' :
+                                           transaction.status === 'en_attente' ? 'En attente' : 'Annulé' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-  
-    <div class="summary-cards">
-      <div class="summary-card">
-        <div class="card-icon revenue-icon">
-          <i class="fas fa-chart-line"></i>
-        </div>
-        <div class="card-content">
-          <h3>Revenu total</h3>
-          <p class="card-value">{{ formatCurrency(financialSummary.totalRevenue) }}</p>
-        </div>
-      </div>
-      
-      <div class="summary-card">
-        <div class="card-icon pending-icon">
-          <i class="fas fa-clock"></i>
-        </div>
-        <div class="card-content">
-          <h3>Paiements en attente</h3>
-          <p class="card-value">{{ formatCurrency(financialSummary.pendingPayments) }}</p>
-        </div>
-      </div>
-      
-      <div class="summary-card">
-        <div class="card-icon transaction-icon">
-          <i class="fas fa-exchange-alt"></i>
-        </div>
-        <div class="card-content">
-          <h3>Transactions</h3>
-          <p class="card-value">{{ transactions.length }}</p>
-        </div>
-      </div>
-    </div>
-  
-    <div class="finance-charts">
-      <div class="chart-container">
-        <h2>Revenu mensuel</h2>
-        <canvas #revenueChart></canvas>
-      </div>
-    </div>
-  
-    <div class="transactions-section">
-      <div class="section-header">
-        <h2>Transactions</h2>
-        <div class="filter-controls">
-          <div class="search-box">
-            <input 
-              type="text" 
-              [(ngModel)]="searchTerm" 
-              (input)="applyFilters()" 
-              placeholder="Rechercher..."
-            >
-            <i class="fas fa-search"></i>
-          </div>
-          
-          <select [(ngModel)]="dateFilter" (change)="applyFilters()">
-            <option value="all">Toutes les dates</option>
-            <option value="today">Aujourd'hui</option>
-            <option value="week">Cette semaine</option>
-            <option value="month">Ce mois</option>
-          </select>
-          
-          <select [(ngModel)]="typeFilter" (change)="applyFilters()">
-            <option value="all">Tous les types</option>
-            <option value="payment">Paiements</option>
-            <option value="refund">Remboursements</option>
-            <option value="charge">Frais</option>
-          </select>
-          
-          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-            <option value="all">Tous les statuts</option>
-            <option value="completed">Complétés</option>
-            <option value="pending">En attente</option>
-            <option value="failed">Échoués</option>
-          </select>
-          
-          <button class="reset-btn" (click)="resetFilters()">
-            <i class="fas fa-redo"></i> Réinitialiser
-          </button>
-        </div>
-      </div>
-      
-      <div class="transactions-table-container">
-        <table class="transactions-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Référence</th>
-              <th>Client</th>
-              <th>Type</th>
-              <th>Montant</th>
-              <th>Méthode</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let transaction of filteredTransactions">
-              <td>{{ transaction.date | date:'dd/MM/yyyy' }}</td>
-              <td>{{ transaction.reference }}</td>
-              <td>{{ transaction.clientName }}</td>
-              <td>
-                <span class="transaction-type" [ngClass]="getTypeClass(transaction.type)">
-                  {{ transaction.type === 'payment' ? 'Paiement' : 
-                     transaction.type === 'refund' ? 'Remboursement' : 'Frais' }}
-                </span>
-              </td>
-              <td [ngClass]="{'amount-positive': transaction.type === 'payment', 'amount-negative': transaction.type === 'refund'}">
-                {{ formatCurrency(transaction.amount) }}
-              </td>
-              <td>{{ transaction.paymentMethod }}</td>
-              <td>
-                <span class="transaction-status" [ngClass]="getStatusClass(transaction.status)">
-                  {{ transaction.status === 'completed' ? 'Complété' : 
-                     transaction.status === 'pending' ? 'En attente' : 'Échoué' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 </div>
-
-</div>
-

@@ -1,28 +1,34 @@
 <div class="locations-card">
     <div class="locations-header">
-      <h3 class="locations-title">Zones de livraison populaires</h3>
+        <h3 class="locations-title">Zones de livraison populaires</h3>
     </div>
     <div class="locations-content">
-      <div class="location-item" *ngFor="let location of locations">
-        <div class="location-header">
-          <div class="location-name">
-            <i class="location-icon">📍</i>
-            <span>{{ location.name }}</span>
-          </div>
-          <span class="location-percentage">{{ location.percentage }}%</span>
+        <div class="location-item" *ngFor="let location of cityLocations">
+            <div class="location-header">
+                <div class="location-name">
+                    <i class="location-icon">📍</i>
+                    <span>{{ location.city }} ({{ location.codePostale }})</span>
+                </div>
+                <span class="location-percentage">{{ location.count }} commandes</span>
+            </div>
+            <div class="location-address" *ngFor="let address of location.addresses">
+                <span>{{ address }}</span>
+            </div>
+            <div class="location-progress">
+                <div class="progress-bar" [style.width.%]="calculateProgressWidth(location)"></div>
+            </div>
         </div>
-        <div class="location-progress">
-          <div class="progress-bar" [style.width.%]="location.percentage"></div>
+
+        <div class="active-zone" *ngIf="activeZone">
+            <h4 class="active-zone-title">
+                <i class="location-icon">📍</i>
+                Zone la plus active
+            </h4>
+            <p class="active-zone-name">{{ activeZone.city }} ({{ activeZone.codePostale }})</p>
+            <p class="active-zone-percentage">{{ activeZone.count }} commandes</p>
+            <div class="active-zone-addresses">
+                <p *ngFor="let address of activeZone.addresses">{{ address }}</p>
+            </div>
         </div>
-      </div>
-  
-      <div class="active-zone" *ngIf="activeZone">
-        <h4 class="active-zone-title">
-          <i class="location-icon">📍</i>
-          Zone la plus active
-        </h4>
-        <p class="active-zone-name">{{ activeZone.name}}</p>
-        <p class="active-zone-percentage">{{activeZone.percentage}}</p>
-      </div>
     </div>
-  </div>
+</div>

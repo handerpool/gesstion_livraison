@@ -34,41 +34,31 @@
       <table class="clients-table">
         <thead>
           <tr>
-            <th (click)="toggleSort('name')">
+            <th (click)="toggleSort('nom')">
               Nom
-              <i class="fas" [ngClass]="{'fa-sort-up': sortBy === 'name' && sortDirection === 'asc', 'fa-sort-down': sortBy === 'name' && sortDirection === 'desc', 'fa-sort': sortBy !== 'name'}"></i>
+              <i class="fas" [ngClass]="sortBy === 'nom' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
             </th>
             <th>Contact</th>
-            <th (click)="toggleSort('city')">
-              Ville
-              <i class="fas" [ngClass]="{'fa-sort-up': sortBy === 'city' && sortDirection === 'asc', 'fa-sort-down': sortBy === 'city' && sortDirection === 'desc', 'fa-sort': sortBy !== 'city'}"></i>
+            <th (click)="toggleSort('codePostale')">
+              Code postal
+              <i class="fas" [ngClass]="sortBy === 'codePostale' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
             </th>
-            <th (click)="toggleSort('joinDate')">
-              Date d'inscription
-              <i class="fas" [ngClass]="{'fa-sort-up': sortBy === 'joinDate' && sortDirection === 'asc', 'fa-sort-down': sortBy === 'joinDate' && sortDirection === 'desc', 'fa-sort': sortBy !== 'joinDate'}"></i>
-            </th>
-            <th (click)="toggleSort('totalOrders')">
-              Commandes
-              <i class="fas" [ngClass]="{'fa-sort-up': sortBy === 'totalOrders' && sortDirection === 'asc', 'fa-sort-down': sortBy === 'totalOrders' && sortDirection === 'desc', 'fa-sort': sortBy !== 'totalOrders'}"></i>
-            </th>
+            <th>Commandes</th>
             <th>Statut</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let client of filteredClients" [ngClass]="{'inactive-row': client.status === 'inactive'}">
-            <td>{{ client.name }}</td>
+          <tr *ngFor="let client of filteredClients">
+            <td>{{ client.nom }} {{ client.prenom }}</td>
             <td>
               <div>{{ client.email }}</div>
-              <div>{{ client.phone }}</div>
+              <div>{{ client.tlf }}</div>
             </td>
-            <td>{{ client.city }}</td>
-            <td>{{ client.joinDate | date:'dd/MM/yyyy' }}</td>
-            <td>{{ client.totalOrders }}</td>
+            <td>{{ client.codePostale }}</td>
+            <td>{{ client.commandes ? client.commandes.length : 0 }}</td>
             <td>
-              <span class="status-badge" [ngClass]="{'active': client.status === 'active', 'inactive': client.status === 'inactive'}">
-                {{ client.status === 'active' ? 'Actif' : 'Inactif' }}
-              </span>
+              <span class="status-badge">{{ client.statut }}</span>
             </td>
             <td class="actions-cell">
               <button class="action-btn view-btn" (click)="viewClientDetails(client)" title="Voir les détails">
@@ -98,7 +88,7 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">Nom:</span>
-                <span class="value">{{ selectedClient.name }}</span>
+                <span class="value">{{ selectedClient.nom }} {{ selectedClient.prenom }}</span>
               </div>
               <div class="info-item">
                 <span class="label">Email:</span>
@@ -106,12 +96,12 @@
               </div>
               <div class="info-item">
                 <span class="label">Téléphone:</span>
-                <span class="value">{{ selectedClient.phone }}</span>
+                <span class="value">{{ selectedClient.tlf }}</span>
               </div>
               <div class="info-item">
                 <span class="label">Statut:</span>
-                <span class="value status-badge" [ngClass]="{'active': selectedClient.status === 'active', 'inactive': selectedClient.status === 'inactive'}">
-                  {{ selectedClient.status === 'active' ? 'Actif' : 'Inactif' }}
+                <span class="value status-badge">
+                  {{ selectedClient.statut }}
                 </span>
               </div>
             </div>
@@ -122,40 +112,13 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">Adresse:</span>
-                <span class="value">{{ selectedClient.address }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Ville:</span>
-                <span class="value">{{ selectedClient.city }}</span>
+                <span class="value">{{ selectedClient.adresse }}</span>
               </div>
               <div class="info-item">
                 <span class="label">Code postal:</span>
-                <span class="value">{{ selectedClient.postalCode }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Pays:</span>
-                <span class="value">{{ selectedClient.country }}</span>
+                <span class="value">{{ selectedClient.codePostale }}</span>
               </div>
             </div>
-          </div>
-          
-          <div class="client-info-section">
-            <h3>Statistiques</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="label">Date d'inscription:</span>
-                <span class="value">{{ selectedClient.joinDate | date:'dd/MM/yyyy' }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Total des commandes:</span>
-                <span class="value">{{ selectedClient.totalOrders }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="client-info-section" *ngIf="selectedClient.notes">
-            <h3>Notes</h3>
-            <p class="notes">{{ selectedClient.notes }}</p>
           </div>
           
           <div class="modal-actions">

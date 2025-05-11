@@ -84,6 +84,10 @@
   .delivery-status-indicator.status-pending {
     background-color: #ef4444;
   }
+
+  .delivery-status-indicator.status-cancelled {
+    background-color: #ef4444;
+  }
   
   .delivery-info {
     flex: 1;
@@ -117,6 +121,11 @@
   }
   
   .delivery-status-badge.status-pending {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  .delivery-status-badge.status-cancelled {
     background-color: rgba(239, 68, 68, 0.1);
     color: #ef4444;
   }

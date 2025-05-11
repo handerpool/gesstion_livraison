@@ -1,43 +1,50 @@
 <div class="deliveries-card">
-    <div class="deliveries-header">
-      <h3 class="deliveries-title">Livraisons récentes</h3>
-      <div class="deliveries-tabs">
-        <div class="tabs-container">
-          <button 
-            *ngFor="let tab of tabs" 
-            class="tab-button" 
-            [class.active]="selectedTab === tab.value"
-            (click)="onTabChange(tab.value)">
-            {{ tab.label }}
-          </button>
-        </div>
-        <button class="filter-button">
-            <i class="filter-icon fas fa-filter"></i>
+  <div class="deliveries-header">
+    <h3 class="deliveries-title">Livraisons récentes</h3>
+    <div class="deliveries-tabs">
+      <div class="tabs-container">
+        <button 
+          *ngFor="let tab of tabs" 
+          class="tab-button" 
+          [class.active]="selectedTab === tab.value"
+          (click)="onTabChange(tab.value)">
+          {{ tab.label }}
         </button>
       </div>
-    </div>
-    <div class="deliveries-content">
-      <div class="delivery-item" *ngFor="let delivery of filteredDeliveries">
-        <div class="delivery-status-indicator" [ngClass]="getStatusClass(delivery.status)"></div>
-        <div class="delivery-info">
-          <div class="delivery-header">
-            <span class="delivery-id">{{ delivery.id }}</span>
-            <span class="delivery-status-badge" [ngClass]="getStatusClass(delivery.status)">
-              {{ getStatusLabel(delivery.status) }}
-            </span>
-          </div>
-          <p class="delivery-customer">{{ delivery.customer }} • {{ delivery.time }}</p>
-        </div>
-        <div class="delivery-details">
-          <p class="delivery-amount">{{ delivery.amount }}</p>
-          <p class="delivery-courier">{{ delivery.courier }}</p>
-        </div>
-        <button class="delivery-actions-button">
-          <i class="more-icon">⋯</i>
-        </button>
-      </div>
-      <div class="deliveries-footer">
-        <button class="view-all-button">Voir toutes les livraisons</button>
-      </div>
+      <button class="filter-button">
+        <i class="filter-icon fas fa-filter"></i>
+      </button>
     </div>
   </div>
+  <div class="deliveries-content">
+    <div class="delivery-item" *ngFor="let delivery of filteredDeliveries">
+      <div class="delivery-status-indicator" [ngClass]="getStatusClass(delivery.statut)"></div>
+      <div class="delivery-info">
+        <div class="delivery-header">
+          <span class="delivery-id">{{ delivery.idCmd }}</span>
+          <span class="delivery-status-badge" [ngClass]="getStatusClass(delivery.statut)">
+            {{ getStatusLabel(delivery.statut) }}
+          </span>
+        </div>
+        <p class="delivery-customer">
+          {{ getCustomerName(delivery) }} •
+          {{ delivery.dateCmd | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+      <div class="delivery-details">
+        <p class="delivery-amount">
+          {{ delivery.prixTotale ? delivery.prixTotale + ' DTN' : 'غير متاح' }}
+        </p>
+        <p class="delivery-courier">
+          {{ delivery.dashboardL?.livreur?.nom || 'غير معين' }}
+        </p>
+      </div>
+      <button class="delivery-actions-button">
+        <i class="more-icon">⋯</i>
+      </button>
+    </div>
+    <div class="deliveries-footer">
+      <button class="view-all-button">Voir toutes les livraisons</button>
+    </div>
+  </div>
+</div>

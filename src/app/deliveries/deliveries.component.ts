@@ -1,62 +1,65 @@
-import { Component, OnInit } from '@angular/core';
-import { Deliveries } from '../models/delivery.model';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { DeliveryService } from '../services/delivery.service';
 import { FormsModule } from '@angular/forms';
+import { Commande, CommandeResponse } from '../models/commande.model';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { DashboardL } from '../models/client.model';
 
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule, DatePipe, SidebarComponent, FormsModule],
+  imports: [CommonModule, SidebarComponent, FormsModule, NgbPaginationModule],
   templateUrl: './deliveries.component.html',
   styleUrls: ['./deliveries.component.css'],
 })
 export class DeliveriesComponent implements OnInit {
   Math = Math;
-  deliveries: Deliveries[] = [];
-  filteredDeliveries: Deliveries[] = [];
-  selectedDelivery: Deliveries | null = null;
+  commandes: Commande[] = [];
+  filteredDeliveries: Commande[] = [];
+  selectedDelivery: Commande | null = null;
   isDetailModalOpen: boolean = false;
   isMapModalOpen: boolean = false;
+  mapInitialized: boolean = false;
 
-  // Filters
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+  totalPages = 0;
+
   selectedStatus: string = 'all';
   searchTerm: string = '';
   selectedDate: string = '';
   selectedAgent: string = 'all';
 
-  // View mode
   viewMode: 'list' | 'map' = 'list';
-
-  // Pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 8;
-  totalItems: number = 0;
-  totalPages: number = 0;
 
   statusOptions = [
     { value: 'all', label: 'Tous les statuts' },
-    { value: 'pending', label: 'En attente' },
-    { value: 'in-progress', label: 'En cours' },
-    { value: 'delivered', label: 'Livré' },
+    { value: 'en_attente', label: 'En attente' },
+    { value: 'livré', label: 'Livré' },
+    { value: 'annulé', label: 'Annulé' },
   ];
 
-  deliveryAgents = [
-    { id: 'all', name: 'Tous les livreurs' },
-    { id: 'agent-1', name: 'Meriem Ben Salah' },
-    { id: 'agent-2', name: 'Khalil Mahjoub' },
-    { id: 'agent-3', name: 'Oussama Hammami' },
-    { id: 'agent-4', name: 'Salma Trabelsi' },
-  ];
+  deliveryAgents: { id: string; name: string }[] = [];
 
-  constructor(private deliveryService: DeliveryService) {}
+  private isBrowser: boolean;
 
-  ngOnInit(): void {
-    this.loadDeliveries();
+  constructor(
+    private deliveryService: DeliveryService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  loadDeliveries(): void {
+  ngOnInit(): void {
+    this.loadDeliveryAgents();
+    this.loadCommandes();
+  }
+
+  loadCommandes(): void {
     this.deliveryService
       .getDeliveries(
         this.currentPage - 1,
@@ -67,58 +70,40 @@ export class DeliveriesComponent implements OnInit {
         this.selectedAgent
       )
       .subscribe({
-        next: (response) => {
-          this.deliveries = response.deliveries;
-          this.filteredDeliveries = response.deliveries;
+        next: (response: CommandeResponse) => {
+          this.commandes = response.commandes;
+          this.filteredDeliveries = response.commandes;
           this.totalItems = response.totalItems;
           this.totalPages = response.totalPages;
-          this.currentPage = response.currentPage;
         },
-        error: (err) => {
-          console.error('Erreur lors du chargement des livraisons:', err);
-          this.filteredDeliveries = [];
-          this.totalItems = 0;
-        },
+        error: (err) => console.error('Error loading commandes:', err),
       });
+  }
+
+  loadDeliveryAgents(): void {
+    this.deliveryService.getDeliveryAgents().subscribe({
+      next: (agents) => {
+        this.deliveryAgents = [{ id: 'all', name: 'Tous les livreurs' }, ...agents];
+      },
+      error: (err) => console.error('Error loading delivery agents:', err),
+    });
   }
 
   applyFilters(): void {
     this.currentPage = 1;
-    this.loadDeliveries();
-  }
-
-  onStatusChange(event: any): void {
-    this.selectedStatus = event.target.value;
-    this.applyFilters();
-  }
-
-  onSearch(event: any): void {
-    this.searchTerm = event.target.value;
-    this.applyFilters();
-  }
-
-  onDateChange(event: any): void {
-    this.selectedDate = event.target.value;
-    this.applyFilters();
-  }
-
-  onAgentChange(event: any): void {
-    this.selectedAgent = event.target.value;
-    this.applyFilters();
+    this.loadCommandes();
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.loadDeliveries();
+    this.loadCommandes();
   }
 
-  toggleViewMode(): void {
-    this.viewMode = this.viewMode === 'list' ? 'map' : 'list';
-  }
-
-  viewDeliveryDetails(delivery: Deliveries): void {
-    this.selectedDelivery = delivery;
-    this.isDetailModalOpen = true;
+  viewDeliveryDetails(delivery: Commande): void {
+    if (delivery && delivery.client) {
+      this.selectedDelivery = delivery;
+      this.isDetailModalOpen = true;
+    }
   }
 
   closeDetailModal(): void {
@@ -126,7 +111,7 @@ export class DeliveriesComponent implements OnInit {
     this.selectedDelivery = null;
   }
 
-  openMapModal(delivery: Deliveries): void {
+  openMapModal(delivery: Commande): void {
     this.selectedDelivery = delivery;
     this.isMapModalOpen = true;
   }
@@ -136,41 +121,23 @@ export class DeliveriesComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    switch (status) {
-      case 'pending':
-        return 'status-pending';
-      case 'in-progress':
-        return 'status-in-transit';
-      case 'delivered':
-        return 'status-delivered';
-      default:
-        return '';
-    }
+    return {
+      en_attente: 'status-pending',
+      livré: 'status-delivered',
+      annulé: 'status-cancelled',
+    }[status] || '';
   }
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'pending':
+      case 'en_attente':
         return 'En attente';
-      case 'in-progress':
-        return 'En cours';
-      case 'delivered':
+      case 'livré':
         return 'Livré';
+      case 'annulé':
+        return 'Annulé';
       default:
-        return '';
-    }
-  }
-
-  getDeliveryProgress(delivery: Deliveries): number {
-    switch (delivery.status) {
-      case 'pending':
-        return 10;
-      case 'in-progress':
-        return 50;
-      case 'delivered':
-        return 100;
-      default:
-        return 0;
+        return status;
     }
   }
 
@@ -179,20 +146,44 @@ export class DeliveriesComponent implements OnInit {
   }
 
   getPageNumbers(): number[] {
-    const totalPages = this.getTotalPages();
-    const pages: number[] = [];
-
+    const totalPages = this.totalPages;
     let startPage = Math.max(1, this.currentPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
+    
+    return Array.from({length: endPage - startPage + 1}, (_, i) => startPage + i);
+  }
 
-    if (endPage - startPage < 4) {
-      startPage = Math.max(1, endPage - 4);
+  trackById(index: number, item: Commande): number {
+    return item.idCmd;
+  }
+
+  ngAfterViewInit() {
+    if (this.viewMode === 'map' && this.isBrowser) {
+      setTimeout(() => this.initMap(), 0);
     }
+  }
 
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+  private initMap(): void {
+    if (!this.isBrowser) {
+      return;
     }
+    
+    import('leaflet').then(L => {
+      const mapElement = document.getElementById('map');
+      if (mapElement) {
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        this.mapInitialized = true;
+      }
+    });
+  }
 
-    return pages;
+  changeView(mode: 'list' | 'map'): void {
+    this.viewMode = mode;
+    if (mode === 'map' && this.isBrowser) {
+      setTimeout(() => this.initMap(), 0);
+    }
   }
 }

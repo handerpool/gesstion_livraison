@@ -1,24 +1,10 @@
 export interface Transaction {
     id: number;
-    date: Date;
-    clientId: number;
+    date: string | Date;
     clientName: string;
-    type: 'payment' | 'refund' | 'charge';
+    type: string;
     amount: number;
-    status: 'completed' | 'pending' | 'failed';
+    status: string;
     paymentMethod: string;
     reference: string;
-    description?: string;
-  }
-  
-  export interface FinancialSummary {
-    totalRevenue: number;
-    pendingPayments: number;
-    recentTransactions: Transaction[];
-    monthlyRevenue: MonthlyRevenue[];
-  }
-  
-  export interface MonthlyRevenue {
-    month: string;
-    revenue: number;
-  }
+}

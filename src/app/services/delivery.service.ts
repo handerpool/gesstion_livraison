@@ -1,92 +1,161 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Delivery, Location, DeliveryStats, StatsCard, Deliveries } from '../models/delivery.model';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Commande, CommandeResponse, DeliveryStats, StatsCard } from '../models/commande.model';
+import { Client } from '../models/client.model';
+import { FinancialSummary } from '../models/financial-summary.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DeliveryService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'http://localhost:8081/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient ) {}
 
   getDeliveries(
-  page: number,
-  size: number,
-  status: string,
-  searchTerm: string,
-  date: string,
-  agent: string
-): Observable<{ deliveries: Deliveries[]; totalItems: number; totalPages: number; currentPage: number }> {
-  let params = new HttpParams()
-    .set('page', page.toString())
-    .set('size', size.toString());
+    page: number,
+    size: number,
+    status: string,
+    searchTerm: string,
+    date: string,
+    agent: string
+  ): Observable<CommandeResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('status', status)
+      .set('searchTerm', searchTerm)
+      .set('date', date)
+      .set('agent', agent);
 
-  if (status && status !== 'all') {
-    params = params.set('status', status);
-  }
-  if (searchTerm) {
-    params = params.set('searchTerm', searchTerm);
-  }
-  if (date) {
-    params = params.set('date', date);
-  }
-  if (agent && agent !== 'all') {
-    params = params.set('agent', agent);
-  }
-
-  console.log('Sending GET /deliveries with params:', params.toString());
-
-  return this.http
-    .get<{ deliveries: Delivery[]; totalItems: number; totalPages: number; currentPage: number }>(
-      `${this.apiUrl}/deliveries`,
-      { params }
-    )
-    .pipe(
-      map((response) => {
-        console.log('Response from /deliveries:', response);
-        return {
-          deliveries: response.deliveries.map((d: Delivery) => ({
-            id: d.id.toString(),
-            customer: {
-              name: d.customer,
-              address: d.address,
-              phone: '', // Default value
-            },
-            status: d.status,
-            time: new Date(d.time).toISOString(),
-            amount: d.amount,
-            courier: d.courier,
-            orderId: '',
-            estimatedDelivery: '',
-            items: 0,
-            location: { lat: 0, lng: 0 },
-            trackingHistory: [],
-          })),
-          totalItems: response.totalItems,
-          totalPages: response.totalPages,
-          currentPage: response.currentPage,
-        };
+    return this.http.get<CommandeResponse>(`${this.apiUrl}/orders`, { params }).pipe(
+      catchError((err) => {
+        console.error('خطأ في جلب التوصيلات:', err);
+        return throwError(() => new Error('فشل في جلب التوصيلات'));
       })
     );
   }
 
-
-  getRecentDeliveries(page: number, size: number): Observable<Delivery[]> {
-    return this.http.get<Delivery[]>(`${this.apiUrl}/deliveries/recent?page=${page}&size=${size}`);
+  updateStatutCommande(id: number, statut: string): Observable<Commande> {
+    return this.http
+      .put<Commande>(`${this.apiUrl}/commandes/${id}/statut/${statut}`, {})
+      .pipe(
+        catchError((err) => {
+          console.error('خطأ في تحديث حالة التوصيل:', err);
+          return throwError(() => new Error('فشل في تحديث حالة التوصيل'));
+        })
+      );
   }
 
-  getTopLocations(page: number, size: number): Observable<Location[]> {
-    return this.http.get<Location[]>(`${this.apiUrl}/locations/top?page=${page}&size=${size}`);
+  getTopClients(page: number, size: number): Observable<Client[]> {
+    return this.http
+      .get<Client[]>(`${this.apiUrl}/dashboard/clients/top?page=${page}&size=${size}`)
+      .pipe(
+        catchError((err) => {
+          console.error('خطأ في جلب أفضل العملاء:', err);
+          return throwError(() => new Error('فشل في جلب أفضل العملاء'));
+        })
+      );
+  }
+
+  getRecentDeliveries(page: number, size: number): Observable<Commande[]> {
+    return this.http
+      .get<Commande[]>(`${this.apiUrl}/dashboard/commandes/recent?page=${page}&size=${size}`)
+      .pipe(
+        catchError((err) => {
+          console.error('خطأ في جلب التوصيلات الأخيرة:', err);
+          const errorMessage = err.error?.error || 'فشل في جلب التوصيلات الأخيرة. تحقق من الخادم.';
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
   getDeliveryStats(): Observable<DeliveryStats> {
-    return this.http.get<DeliveryStats>(`${this.apiUrl}/deliveries/stats`);
+    return this.http.get<DeliveryStats>(`${this.apiUrl}/dashboard/commandes/stats`).pipe(
+      catchError((err) => {
+        console.error('خطأ في جلب إحصائيات التوصيل:', err);
+        return throwError(() => new Error('فشل في جلب إحصائيات التوصيل'));
+      })
+    );
   }
 
   getStatsCards(): Observable<StatsCard[]> {
-    return this.http.get<StatsCard[]>(`${this.apiUrl}/stats/cards`);
+    return this.http.get<StatsCard[]>(`${this.apiUrl}/dashboard/stats/cards`).pipe(
+      catchError((err) => {
+        console.error('خطأ في جلب بطاقات الإحصائيات:', err);
+        return throwError(() => new Error('فشل في جلب بطاقات الإحصائيات'));
+      })
+    );
   }
+
+  createOrder(orderData: Commande): Observable<Commande> {
+    return this.http.post<Commande>(`${this.apiUrl}/orders`, orderData).pipe(
+      catchError((err) => {
+        console.error('خطأ في إنشاء الطلب:', err);
+        return throwError(() => new Error('فشل في إنشاء الطلب'));
+      })
+    );
+  }
+
+  getCommandes(
+    page: number = 0,
+    size: number = 10,
+    status: string = 'all',
+    searchTerm: string = '',
+    date: string = '',
+    agent: string = 'all'
+  ): Observable<CommandeResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('status', status)
+      .set('searchTerm', searchTerm)
+      .set('date', date)
+      .set('agent', agent);
+
+    return this.http.get<CommandeResponse>(`${this.apiUrl}/orders`, { params }).pipe(
+      catchError((err) => {
+        console.error('خطأ في جلب الطلبات:', err);
+        return throwError(() => new Error('فشل في جلب الطلبات'));
+      })
+    );
+  }
+
+  getDeliveryAgents(): Observable<{ id: string; name: string }[]> {
+    return this.http.get<{ id: string; name: string }[]>(`${this.apiUrl}/delivery-agents`).pipe(
+      catchError((err) => {
+        console.error('خطأ في جلب وكلاء التوصيل:', err);
+        return throwError(() => new Error('فشل في جلب وكلاء التوصيل'));
+      })
+    );
+  }
+
+  getFinancialSummary(): Observable<FinancialSummary> {
+        return this.http.get<FinancialSummary>(`${this.apiUrl}/finance/summary`).pipe(
+            catchError((err) => {
+                console.error('خطأ في جلب البيانات المالية:', err);
+                return throwError(() => new Error('فشل في جلب البيانات المالية'));
+            })
+        );
+    }
+  getDeliveryZones(): Observable<DeliveryZonesResponse> {
+        return this.http.get<DeliveryZonesResponse>(`${this.apiUrl}/dashboard/delivery-zones`).pipe(
+            catchError((err) => {
+                console.error('خطأ في جلب مناطق التوصيل:', err);
+                return throwError(() => new Error('فشل في جلب مناطق التوصيل'));
+            })
+        );
+    }
+}
+interface DeliveryZone {
+    city: string;
+    postalCode: string;
+    address: string;
+    orderCount: number;
+}
+interface DeliveryZonesResponse {
+    deliveryZones: DeliveryZone[];
+    mostActiveZone: DeliveryZone;
 }

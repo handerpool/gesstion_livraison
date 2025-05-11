@@ -1,17 +1,17 @@
 import { NgClass, NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { StatsCard } from '../models/delivery.model';
+import { Component, Input, OnInit } from '@angular/core';
+import { StatsCard } from '../models/commande.model';
 import { DeliveryService } from '../services/delivery.service';
 
 @Component({
   selector: 'app-stats-cards',
   standalone: true,
-  imports: [NgClass,NgFor],
+  imports: [NgClass, NgFor],
   templateUrl: './stats-cards.component.html',
-  styleUrl: './stats-cards.component.css'
+  styleUrls: ['./stats-cards.component.css']
 })
-export class StatsCardsComponent implements OnInit{
-  statsCards:StatsCard[]=[];
+export class StatsCardsComponent implements OnInit {
+  @Input() statsCards: StatsCard[] = [];
 
   constructor(private deliveryService: DeliveryService) {}
 
@@ -29,4 +29,4 @@ export class StatsCardsComponent implements OnInit{
       }
     });
   }
-} 
+}

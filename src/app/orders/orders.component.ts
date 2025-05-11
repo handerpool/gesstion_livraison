@@ -1,28 +1,29 @@
-import { Component, NgModule, OnInit } from '@angular/core';
-import { Order } from '../models/order.model';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { OrderService } from '../services/order.service';
+import { DeliveryService } from '../services/delivery.service';
 import { FormsModule } from '@angular/forms';
 import { QRCodeModule } from 'angularx-qrcode';
+import { Commande, CommandeResponse, Produit } from '../models/commande.model';
+import { Client, RoleUser } from '../models/client.model';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
   imports: [CommonModule, DatePipe, SidebarComponent, FormsModule, QRCodeModule],
   templateUrl: './orders.component.html',
-  styleUrl: './orders.component.css'
+  styleUrl: './orders.component.css',
 })
 export class OrdersComponent implements OnInit {
   Math = Math;
   parseFloat = parseFloat;
-  orders: Order[] = [];
-  filteredOrders: Order[] = [];
+  orders: Commande[] = [];
+  filteredOrders: Commande[] = [];
   selectedStatus: string = 'all';
   searchTerm: string = '';
-  sortBy: string = 'date';
+  sortBy: string = 'dateCmd';
   sortDirection: 'asc' | 'desc' = 'desc';
-  selectedOrder: Order | null = null;
+  selectedOrder: Commande | null = null;
   isDetailModalOpen: boolean = false;
   
   // New order form properties
@@ -31,16 +32,15 @@ export class OrdersComponent implements OnInit {
   qrCodeData: string = '';
   
   newOrder: any = {
-    customer: {
-      name: '',
-      email: '',
-      phone: ''
-    },
-    address: '',
-    items: [{ name: '', quantity: 1, price: '0 DTN' }],
-    date: new Date().toISOString(),
-    status: 'PENDING',
-    paymentMethod: 'Carte bancaire'
+    client: { nom: '', prenom: '', email: '', tlf: '' },
+    produit: { nomProd: '' },
+    adresse: '',
+    codePostale: '',
+    statut: 'en_attente',
+    dateCmd: new Date().toISOString(),
+    quantity: 1,
+    prixUnitaire: 0,
+    prixTotale: 0,
   };
   
   currentPage: number = 1;
@@ -49,56 +49,50 @@ export class OrdersComponent implements OnInit {
   totalPages: number = 0;
   
   statusOptions = [
-    { value: 'all', label: 'Tous les statuts' },
-    { value: 'PENDING', label: 'En attente' },
-    { value: 'PROCESSING', label: 'En traitement' },
-    { value: 'SHIPPED', label: 'Expédié' },
-    { value: 'DELIVERED', label: 'Livré' },
-    { value: 'CANCELLED', label: 'Annulé' }
+    { value: 'all', label: 'كل الحالات' },
+    { value: 'en_attente', label: 'في الانتظار' },
+    { value: 'livré', label: 'تم التوصيل' },
+    { value: 'annulé', label: 'ملغى' },
   ];
   
   sortOptions = [
-    { value: 'date', label: 'Date' },
-    { value: 'id', label: 'Numéro de commande' },
-    { value: 'customer.name', label: 'Client' },
-    { value: 'total', label: 'Montant' }
+    { value: 'dateCmd', label: 'التاريخ' },
+    { value: 'idCmd', label: 'رقم الطلب' },
+    { value: 'client', label: 'العميل' },
+    { value: 'prixTotale', label: 'المبلغ' },
   ];
 
-  constructor(private orderService: OrderService) {}
+  constructor(private deliveryService: DeliveryService) {}
 
   ngOnInit(): void {
     this.loadOrders();
   }
 
   loadOrders(): void {
-    this.orderService.getOrders(
+    this.deliveryService.getCommandes(
       this.currentPage - 1,
       this.itemsPerPage,
       this.selectedStatus,
       this.searchTerm,
-      this.sortBy,
-      this.sortDirection
+      '', // date parameter
+      'all' // agent parameter
     ).subscribe({
-      next: (response) => {
-        console.log('API Response:', JSON.stringify(response, null, 2));
-        this.orders = response.orders || [];
-        this.filteredOrders = response.orders|| [];
-        this.totalItems = response.totalItems || 0;
-        this.totalPages = response.totalPages || 1;
+      next: (response: CommandeResponse) => {
+        console.log('استجابة API:', JSON.stringify(response, null, 2));
+        this.orders = response.commandes || [];
+        this.filteredOrders = [...this.orders];
+        this.totalItems = response.totalItems || this.orders.length;
+        this.totalPages = response.totalPages || Math.ceil(this.totalItems / this.itemsPerPage);
         this.currentPage = response.currentPage || 1;
+        this.applyFilters();
       },
       error: (err) => {
-        console.error('Error fetching orders:', {
-          status: err.status,
-          statusText: err.statusText,
-          message: err.message,
-          error: err.error
-        });
+        console.error('خطأ في جلب الطلبات:', err);
         this.filteredOrders = [];
         this.totalItems = 0;
         this.totalPages = 0;
-        alert('Erreur lors du chargement des commandes. Veuillez réessayer.');
-      }
+        alert('خطأ أثناء تحميل الطلبات. الرجاء المحاولة مرة أخرى.');
+      },
     });
   }
 
@@ -106,38 +100,86 @@ export class OrdersComponent implements OnInit {
     const target = event.target as HTMLSelectElement;
     this.selectedStatus = target.value;
     this.currentPage = 1;
-    this.loadOrders();
+    this.applyFilters();
   }
 
   onSearch(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
     this.currentPage = 1;
-    this.loadOrders();
+    this.applyFilters();
   }
 
   onSortChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.sortBy = target.value;
-    this.loadOrders();
+    this.applyFilters();
   }
 
   toggleSortDirection(): void {
     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    this.loadOrders();
+    this.applyFilters();
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.loadOrders();
+    this.applyFilters();
   }
 
-  viewOrderDetails(order: Order): void {
-    this.selectedOrder = order;
-    this.isDetailModalOpen = true;
-    
-    // Generate QR code for the selected order
-    this.generateQrCode(order);
+  applyFilters(): void {
+    let filtered = [...this.orders];
+
+    // Filter by status
+    if (this.selectedStatus !== 'all') {
+      filtered = filtered.filter(order => order.statut === this.selectedStatus);
+    }
+
+    // Filter by search term
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(order =>
+        `${order.client?.nom ?? ''} ${order.client?.prenom ?? ''}`.toLowerCase().includes(term) ||
+        order.client?.email?.toLowerCase().includes(term) ||
+        order.idCmd.toString().includes(term)
+      );
+    }
+
+    // Sorting
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      switch (this.sortBy) {
+        case 'idCmd':
+          comparison = a.idCmd - b.idCmd;
+          break;
+        case 'client':
+          comparison = `${a.client?.nom ?? ''} ${a.client?.prenom ?? ''}`.localeCompare(
+            `${b.client?.nom ?? ''} ${b.client?.prenom ?? ''}`
+          );
+          break;
+        case 'dateCmd':
+          comparison = new Date(a.dateCmd).getTime() - new Date(b.dateCmd).getTime(); // Handle dateCmd as string
+          break;
+        case 'prixTotale':
+          comparison = (a.prixTotale ?? 0) - (b.prixTotale ?? 0);
+          break;
+      }
+      return this.sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    // Pagination
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.filteredOrders = filtered.slice(start, end);
+    this.totalItems = filtered.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  viewOrderDetails(order: Commande): void {
+    if (order && order.client && order.produit) {
+      this.selectedOrder = order;
+      this.isDetailModalOpen = true;
+      this.generateQrCode(order);
+    }
   }
 
   closeDetailModal(): void {
@@ -145,25 +187,29 @@ export class OrdersComponent implements OnInit {
     this.selectedOrder = null;
   }
 
-  getStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'pending': return 'status-pending';
-      case 'processing': return 'status-processing';
-      case 'shipped': return 'status-shipped';
-      case 'delivered': return 'status-delivered';
-      case 'cancelled': return 'status-cancelled';
-      default: return '';
+  getStatusClass(statut?: string): string {
+    switch (statut) {
+      case 'en_attente':
+        return 'status-pending';
+      case 'livré':
+        return 'status-delivered';
+      case 'annulé':
+        return 'status-cancelled';
+      default:
+        return '';
     }
   }
 
-  getStatusLabel(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'pending': return 'En attente';
-      case 'processing': return 'En traitement';
-      case 'shipped': return 'Expédié';
-      case 'delivered': return 'Livré';
-      case 'cancelled': return 'Annulé';
-      default: return '';
+  getStatusLabel(statut?: string): string {
+    switch (statut) {
+      case 'en_attente':
+        return 'في الانتظار';
+      case 'livré':
+        return 'تم التوصيل';
+      case 'annulé':
+        return 'ملغى';
+      default:
+        return 'غير معروف';
     }
   }
 
@@ -191,15 +237,14 @@ export class OrdersComponent implements OnInit {
 
   getDisplayRange(): string {
     if (this.totalItems === 0) {
-      return 'Affichage de 0 à 0 sur 0 commandes';
+      return 'عرض من 0 إلى 0 من 0 طلبات';
     }
     const start = (this.currentPage - 1) * this.itemsPerPage + 1;
     const end = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
-    return `Affichage de ${start} à ${end} sur ${this.totalItems} commandes`;
+    return `عرض من ${start} إلى ${end} من ${this.totalItems} طلبات`;
   }
   
-  // New methods for handling new orders and QR codes
-  
+  // New order methods
   openNewOrderModal(): void {
     this.resetNewOrderForm();
     this.isNewOrderModalOpen = true;
@@ -211,85 +256,75 @@ export class OrdersComponent implements OnInit {
   
   resetNewOrderForm(): void {
     this.newOrder = {
-      customer: {
-        name: '',
-        email: '',
-        phone: ''
-      },
-      address: '',
-      items: [{ name: '', quantity: 1, price: '0 DTN' }],
-      date: new Date().toISOString(),
-      status: 'PENDING',
-      paymentMethod: 'Carte bancaire'
+      client: { nom: '', prenom: '', email: '', tlf: '' },
+      produit: { nomProd: '' },
+      adresse: '',
+      codePostale: '',
+      statut: 'en_attente',
+      dateCmd: new Date().toISOString(),
+      quantity: 1,
+      prixUnitaire: 0,
+      prixTotale: 0,
     };
-  }
-  
-  addItem(): void {
-    this.newOrder.items.push({ name: '', quantity: 1, price: '0 DTN' });
-  }
-  
-  removeItem(index: number): void {
-    if (this.newOrder.items.length > 1) {
-      this.newOrder.items.splice(index, 1);
-    }
   }
   
   calculateTotal(): string {
-    const total = this.newOrder.items.reduce((sum: number, item: any) => {
-      const price = parseFloat(item.price.replace('DTN', '').replace(',', '.'));
-      return sum + (item.quantity * price);
-    }, 0);
-    
-    return total.toFixed(2) + ' DTN';
+    const total = (this.newOrder.quantity || 1) * (this.newOrder.prixUnitaire || 0);
+    return total.toFixed(2) + ' د.ت';
   }
   
   submitNewOrder(): void {
-    // Calculate total
-    const total = this.calculateTotal();
-    
-    // Prepare order data
-    const orderData = {
-      ...this.newOrder,
-      total,
-      id: 'ORD-' + Math.floor(Math.random() * 10000) // Generate a random ID for demo
+    const orderData: Commande = {
+      idCmd: 0, // سيتم تجاهله بواسطة الخادم
+      client: {
+        idUser: 0, // يفترض أن الخادم ينشئ العميل أو يربطه
+        nom: this.newOrder.client!.nom,
+        prenom: this.newOrder.client!.prenom,
+        email: this.newOrder.client!.email,
+        tlf: this.newOrder.client!.tlf,
+        statut: RoleUser.client,
+      } as Client,
+      adresse: this.newOrder.adresse!,
+      codePostale: this.newOrder.codePostale!,
+      statut: this.newOrder.statut!,
+      dateCmd: this.newOrder.dateCmd!,
+      estpayee: this.newOrder.estpayee!,
+      produit: {
+        idProd: 0, // يفترض أن الخادم ينشئ المنتج أو يربطه
+        nomProd: this.newOrder.produit!.nomProd,
+        prix: this.newOrder.prixUnitaire!,
+      } as Produit,
+      quantity: this.newOrder.quantity!,
+      prixht: this.newOrder.prixUnitaire!,
+      prixUnitaire: this.newOrder.prixUnitaire!,
+      prixTotale: (this.newOrder.quantity! * this.newOrder.prixUnitaire!) || 0,
+      tlf: this.newOrder.client!.tlf,
+      qrCode: undefined,
+      dashboardL: undefined,
     };
-    
-    this.orderService.createOrder(orderData).subscribe({
-      next: (response) => {
-        console.log('Order created:', response);
+
+    this.deliveryService.createOrder(orderData).subscribe({
+      next: (response: Commande) => {
         this.closeNewOrderModal();
-        
-        // Generate QR code for the new order
         this.generateQrCode(response);
         this.isQrCodeModalOpen = true;
-        
-        // Refresh the order list
         this.loadOrders();
       },
       error: (err) => {
-        console.error('Error creating order:', err);
-        alert('Erreur lors de la création de la commande. Veuillez réessayer.');
-      }
+        console.error('خطأ في إنشاء الطلب:', err);
+        alert('خطأ أثناء إنشاء الطلب.');
+      },
     });
   }
   
-  generateQrCode(order: Order): void {
-    // In a real app, you would call your backend API to generate the QR code
-    // Use your existing backend functionality here
-    
-    // For now, we'll simulate it by creating a JSON string of order data
+  generateQrCode(order: Commande): void {
     this.qrCodeData = JSON.stringify({
-      id: order.id,
-      customerName: order.customer?.name,
-      total: order.total,
-      date: order.date,
-      status: order.status
+      idCmd: order.idCmd,
+      clientName: `${order.client?.nom ?? ''} ${order.client?.prenom ?? ''}`,
+      prixTotale: order.prixTotale ?? 0,
+      dateCmd: order.dateCmd,
+      statut: order.statut
     });
-    
-    // In a real implementation, you would call your backend:
-    // this.orderService.generateQrCode(order.id).subscribe(data => {
-    //   this.qrCodeData = data.qrCodeUrl; // or however your backend returns the QR code
-    // });
   }
   
   closeQrCodeModal(): void {
@@ -306,7 +341,7 @@ export class OrdersComponent implements OnInit {
     windowPrint.document.write(`
       <html>
         <head>
-          <title>QR Code - Commande</title>
+          <title>رمز QR - الطلب</title>
           <style>
             body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
             .qr-container { margin: 20px auto; }

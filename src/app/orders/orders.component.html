@@ -6,15 +6,15 @@
   <div class="main-content">
     <header class="orders-header">
       <div>
-        <h1 class="orders-title">Commandes</h1>
-        <p class="orders-subtitle">Gérez vos commandes et suivez leur statut</p>
+        <h1 class="orders-title">الطلبات</h1>
+        <p class="orders-subtitle">إدارة الطلبات ومتابعة حالتها</p>
       </div>
 
       <div class="header-actions">
         <div class="search-container">
           <input 
             type="text" 
-            placeholder="Rechercher une commande..." 
+            placeholder="البحث عن طلب..." 
             class="search-input"
             (input)="onSearch($event)">
             <i class="search-icon fas fa-search"></i> 
@@ -36,7 +36,7 @@
       <!-- Filters -->
       <div class="filters-container">
         <div class="filter-group">
-          <label for="status-filter">Filtrer par statut:</label>
+          <label for="status-filter">تصفية حسب الحالة:</label>
           <select 
             id="status-filter" 
             class="filter-select"
@@ -49,7 +49,7 @@
         </div>
 
         <div class="filter-group">
-          <label for="sort-by">Trier par:</label>
+          <label for="sort-by">ترتيب حسب:</label>
           <div class="sort-controls">
             <select 
               id="sort-by" 
@@ -62,18 +62,18 @@
             </select>
             <button class="sort-direction-button" (click)="toggleSortDirection()">
               <i class="sort-icon fas" [ngClass]="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
-          </button>
+            </button>
           </div>
         </div>
 
         <div class="filter-actions">
           <button class="action-button primary" (click)="openNewOrderModal()">
             <i class="add-icon">+</i>
-            Nouvelle commande
+            طلب جديد
           </button>
           <button class="action-button secondary">
             <i class="export-icon">↓</i>
-            Exporter
+            تصدير
           </button>
         </div>
       </div>
@@ -83,39 +83,34 @@
         <table class="orders-table">
           <thead>
             <tr>
-              <th>N° Commande</th>
-              <th>Client</th>
-              <th>Date</th>
-              <th>Statut</th>
-              <th>Total</th>
-              <th>Actions</th>
+              <th>رقم الطلب</th>
+              <th>العميل</th>
+              <th>التاريخ</th>
+              <th>الحالة</th>
+              <th>الإجمالي</th>
+              <th>الإجراءات</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let order of filteredOrders">
-              <td class="order-id">{{ order.id }}</td>
+              <td>{{ order?.idCmd }}</td>
+              <td>{{ order?.client?.nom }} {{ order?.client?.prenom }}</td>
+              <td>{{ order?.dateCmd | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
-                <div class="customer-info">
-                  <span class="customer-name">{{ order.customer.name }}</span>
-                  <span class="customer-email">{{ order.customer.email }}</span>
-                </div>
-              </td>
-              <td>{{ order.date | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>
-                <span class="status-badge" [ngClass]="getStatusClass(order.status)">
-                  {{ getStatusLabel(order.status) }}
+                <span class="status-badge" [ngClass]="getStatusClass(order?.statut)">
+                  {{ getStatusLabel(order?.statut) }}
                 </span>
               </td>
-              <td class="order-total">{{ order.total || 'N/A'}}</td>
+              <td>{{ order?.prixTotale }} د.ت</td>
               <td>
                 <div class="action-buttons">
-                  <button class="table-action-button" (click)="viewOrderDetails(order)" title="Voir les détails">
+                  <button class="table-action-button" (click)="viewOrderDetails(order)" title="عرض التفاصيل">
                       <i class="view-icon fas fa-eye"></i>
                   </button>
-                  <button class="table-action-button" title="Modifier">
+                  <button class="table-action-button" title="تعديل">
                       <i class="edit-icon fas fa-pen"></i>                   
                   </button>
-                  <button class="table-action-button" title="Plus d'options">
+                  <button class="table-action-button" title="خيارات إضافية">
                       <i class="fas fa-ellipsis-v more-icon"></i>
                   </button>
                 </div>
@@ -128,24 +123,23 @@
         <div class="empty-state" *ngIf="filteredOrders.length === 0">
           <div class="empty-icon">
               <i class="fas fa-box-open"></i>
-            </div>            
-          <h3>Aucune commande trouvée</h3>
-          <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
+          </div>            
+          <h3>لم يتم العثور على طلبات</h3>
+          <p>حاول تعديل الفلاتر أو إجراء بحث جديد.</p>
         </div>
       </div>
 
       <!-- Pagination -->
       <div class="pagination-container" *ngIf="totalItems > 0">
         <div class="pagination-info">
-          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à 
-          {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} commandes
+          {{ getDisplayRange() }}
         </div>
         <div class="pagination-controls">
           <button 
             class="pagination-button" 
             [disabled]="currentPage === 1"
             (click)="onPageChange(currentPage - 1)">
-            Précédent
+            السابق
           </button>
           
           <button 
@@ -178,7 +172,7 @@
             class="pagination-button" 
             [disabled]="currentPage === getTotalPages()"
             (click)="onPageChange(currentPage + 1)">
-            Suivant
+            التالي
           </button>
         </div>
       </div>
@@ -188,87 +182,85 @@
   <!-- Order detail modal -->
   <div class="modal-overlay" *ngIf="isDetailModalOpen" (click)="closeDetailModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="modal-title">Détails de la commande {{ selectedOrder?.id }}</h2>
+      <div class="modal-header" *ngIf="selectedOrder">
+        <h2 class="modal-title">تفاصيل الطلب {{ selectedOrder.idCmd }}</h2>
         <button class="modal-close-button" (click)="closeDetailModal()">×</button>
       </div>
       
       <div class="modal-body" *ngIf="selectedOrder">
         <div class="order-detail-grid">
           <div class="order-detail-section">
-            <h3 class="section-title">Informations client</h3>
-            <div class="detail-item">
-              <span class="detail-label">Nom:</span>
-              <span class="detail-value">{{ selectedOrder.customer.name }}</span>
+            <h3 class="section-title">معلومات العميل</h3>
+            <div class="detail-item" *ngIf="selectedOrder && selectedOrder.client">
+              <span class="detail-label">الاسم:</span>
+              <span class="detail-value">{{ selectedOrder.client.nom }} {{ selectedOrder.client.prenom }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedOrder && selectedOrder.client">
+              <span class="detail-label">البريد الإلكتروني:</span>
+              <span class="detail-value">{{ selectedOrder.client.email }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Email:</span>
-              <span class="detail-value">{{ selectedOrder.customer.email }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Téléphone:</span>
-              <span class="detail-value">{{ selectedOrder.customer.phone }}</span>
+              <span class="detail-label">الهاتف:</span>
+              <span class="detail-value">{{ selectedOrder.tlf }}</span>
             </div>
           </div>
           
           <div class="order-detail-section">
-            <h3 class="section-title">Informations commande</h3>
+            <h3 class="section-title">معلومات الطلب</h3>
             <div class="detail-item">
-              <span class="detail-label">Date:</span>
-              <span class="detail-value">{{ selectedOrder.date | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="detail-label">التاريخ:</span>
+              <span class="detail-value">{{ selectedOrder.dateCmd | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Statut:</span>
-              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedOrder.status)">
-                {{ getStatusLabel(selectedOrder.status) }}
+              <span class="detail-label">الحالة:</span>
+              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedOrder.statut)">
+                {{ getStatusLabel(selectedOrder.statut) }}
               </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Paiement:</span>
-              <span class="detail-value">{{ selectedOrder.paymentMethod }}</span>
+              <span class="detail-label">الدفع:</span>
+              <span class="detail-value">{{ selectedOrder.estpayee ? 'مدفوع' : 'غير مدفوع' }}</span>
             </div>
           </div>
           
           <div class="order-detail-section full-width">
-            <h3 class="section-title">Adresse de livraison</h3>
+            <h3 class="section-title">عنوان التوصيل</h3>
             <div class="detail-item">
-              <span class="detail-value">{{ selectedOrder.address }}</span>
+              <span class="detail-value">{{ selectedOrder.adresse }}</span>
             </div>
           </div>
           
           <div class="order-detail-section full-width">
-            <h3 class="section-title">Articles commandés</h3>
+            <h3 class="section-title">المنتج المطلوب</h3>
             <table class="items-table">
               <thead>
                 <tr>
-                  <th>Article</th>
-                  <th>Quantité</th>
-                  <th>Prix unitaire</th>
-                  <th>Total</th>
+                  <th>المنتج</th>
+                  <th>الكمية</th>
+                  <th>السعر الوحدي</th>
+                  <th>الإجمالي</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let item of selectedOrder.items">
-                  <td>{{ item.name }}</td>
-                  <td class="text-center">{{ item.quantity }}</td>
-                  <td class="text-right">{{ item.price }}</td>
-                  <td class="text-right">
-                    {{ (parseFloat(item.price.replace('DTN', '').replace(',', '.')) * item.quantity).toFixed(2) + ' DTN' }}
-                  </td>
+                <tr *ngIf="selectedOrder && selectedOrder.produit">
+                  <td>{{ selectedOrder.produit.nomProd }}</td>
+                  <td class="text-center">{{ selectedOrder.quantity }}</td>
+                  <td class="text-right">{{ selectedOrder.prixUnitaire }} د.ت</td>
+                  <td class="text-right">{{ selectedOrder.prixTotale }} د.ت</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="3" class="text-right"><strong>Total</strong></td>
-                  <td class="text-right"><strong>{{ selectedOrder.total }}</strong></td>
+                  <td colspan="3" class="text-right"><strong>الإجمالي</strong></td>
+                  <td class="text-right"><strong>{{ selectedOrder.prixTotale }} د.ت</strong></td>
                 </tr>
               </tfoot>
             </table>
           </div>
           
-          <!-- QR Code Section (Replacing Localise action) -->
+          <!-- QR Code Section -->
           <div class="order-detail-section full-width">
-            <h3 class="section-title">QR Code de la commande</h3>
+            <h3 class="section-title">رمز QR للطلب</h3>
             <div class="qr-code-container">
               <qrcode 
                 [qrdata]="qrCodeData" 
@@ -276,7 +268,7 @@
                 [errorCorrectionLevel]="'M'"
               ></qrcode>
               <button class="action-button secondary qr-print-button" (click)="printQrCode()">
-                <i class="fas fa-print"></i> Imprimer le QR Code
+                <i class="fas fa-print"></i> طباعة رمز QR
               </button>
             </div>
           </div>
@@ -284,8 +276,8 @@
       </div>
       
       <div class="modal-footer">
-        <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
-        <button class="action-button primary">Modifier le statut</button>
+        <button class="action-button secondary" (click)="closeDetailModal()">إغلاق</button>
+        <button class="action-button primary">تعديل الحالة</button>
       </div>
     </div>
   </div>
@@ -294,157 +286,152 @@
   <div class="modal-overlay" *ngIf="isNewOrderModalOpen" (click)="closeNewOrderModal()">
     <div class="modal-content new-order-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="modal-title">Nouvelle Commande</h2>
+        <h2 class="modal-title">طلب جديد</h2>
         <button class="modal-close-button" (click)="closeNewOrderModal()">×</button>
       </div>
       
       <div class="modal-body">
         <form (ngSubmit)="submitNewOrder()">
           <div class="form-section">
-            <h3 class="section-title">Informations client</h3>
+            <h3 class="section-title">معلومات العميل</h3>
             <div class="form-row">
               <div class="form-group">
-                <label for="customerName">Nom du client</label>
+                <label for="customerName">اسم العميل</label>
                 <input 
                   type="text" 
                   id="customerName" 
                   name="customerName" 
-                  [(ngModel)]="newOrder.customer.name" 
+                  [(ngModel)]="newOrder.client.nom" 
                   required
                 >
               </div>
               
               <div class="form-group">
-                <label for="customerEmail">Email</label>
+                <label for="customerPrenom">اللقب</label>
                 <input 
-                  type="email" 
-                  id="customerEmail" 
-                  name="customerEmail" 
-                  [(ngModel)]="newOrder.customer.email"
+                  type="text" 
+                  id="customerPrenom" 
+                  name="customerPrenom" 
+                  [(ngModel)]="newOrder.client.prenom" 
+                  required
                 >
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
-                <label for="customerPhone">Téléphone</label>
+                <label for="customerEmail">البريد الإلكتروني</label>
                 <input 
-                  type="tel" 
-                  id="customerPhone" 
-                  name="customerPhone" 
-                  [(ngModel)]="newOrder.customer.phone" 
-                  required
+                  type="email" 
+                  id="customerEmail" 
+                  name="customerEmail" 
+                  [(ngModel)]="newOrder.client.email"
                 >
               </div>
               
               <div class="form-group">
-                <label for="paymentMethod">Méthode de paiement</label>
-                <select 
-                  id="paymentMethod" 
-                  name="paymentMethod" 
-                  [(ngModel)]="newOrder.paymentMethod"
+                <label for="customerPhone">الهاتف</label>
+                <input 
+                  type="tel" 
+                  id="customerPhone" 
+                  name="customerPhone" 
+                  [(ngModel)]="newOrder.client.tlf" 
+                  required
                 >
-                  <option value="Carte bancaire">Carte bancaire</option>
-                  <option value="Espèces">Espèces</option>
-                  <option value="Virement">Virement</option>
-                </select>
               </div>
             </div>
             
             <div class="form-group">
-              <label for="address">Adresse de livraison</label>
+              <label for="address">عنوان التوصيل</label>
               <textarea 
                 id="address" 
                 name="address" 
-                [(ngModel)]="newOrder.address" 
+                [(ngModel)]="newOrder.adresse" 
                 required
               ></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="codePostale">الرمز البريدي</label>
+              <input 
+                type="text" 
+                id="codePostale" 
+                name="codePostale" 
+                [(ngModel)]="newOrder.codePostale" 
+                required
+              >
             </div>
           </div>
           
           <div class="form-section">
-            <h3 class="section-title">Articles</h3>
+            <h3 class="section-title">المنتج</h3>
             <div class="order-items">
-              <div class="order-item" *ngFor="let item of newOrder.items; let i = index">
+              <div class="order-item">
                 <div class="form-row">
                   <div class="form-group item-name">
-                    <label [for]="'itemName' + i">Article</label>
+                    <label for="itemName">اسم المنتج</label>
                     <input 
                       type="text" 
-                      [id]="'itemName' + i" 
-                      [name]="'itemName' + i" 
-                      [(ngModel)]="item.name" 
+                      id="itemName" 
+                      name="itemName" 
+                      [(ngModel)]="newOrder.produit.nomProd" 
                       required
                     >
                   </div>
                   
                   <div class="form-group item-quantity">
-                    <label [for]="'itemQuantity' + i">Quantité</label>
+                    <label for="itemQuantity">الكمية</label>
                     <input 
                       type="number" 
-                      [id]="'itemQuantity' + i" 
-                      [name]="'itemQuantity' + i" 
-                      [(ngModel)]="item.quantity" 
+                      id="itemQuantity" 
+                      name="itemQuantity" 
+                      [(ngModel)]="newOrder.quantity" 
                       min="1" 
                       required
                     >
                   </div>
                   
                   <div class="form-group item-price">
-                    <label [for]="'itemPrice' + i">Prix</label>
+                    <label for="itemPrice">السعر الوحدي (د.ت)</label>
                     <input 
-                      type="text" 
-                      [id]="'itemPrice' + i" 
-                      [name]="'itemPrice' + i" 
-                      [(ngModel)]="item.price" 
-                      placeholder="0 DTN"
+                      type="number" 
+                      id="itemPrice" 
+                      name="itemPrice" 
+                      [(ngModel)]="newOrder.prixUnitaire" 
+                      step="0.01" 
                       required
                     >
                   </div>
-                  
-                  <button 
-                    type="button" 
-                    class="remove-item-btn" 
-                    (click)="removeItem(i)" 
-                    *ngIf="newOrder.items.length > 1"
-                    title="Supprimer cet article"
-                  >
-                    <i class="fas fa-times"></i>
-                  </button>
                 </div>
               </div>
-              
-              <button type="button" class="add-item-btn" (click)="addItem()">
-                <i class="fas fa-plus"></i> Ajouter un article
-              </button>
             </div>
             
             <div class="order-total">
-              <span class="total-label">Total:</span>
+              <span class="total-label">الإجمالي:</span>
               <span class="total-value">{{ calculateTotal() }}</span>
             </div>
           </div>
           
           <div class="form-actions">
-            <button type="button" class="action-button secondary" (click)="closeNewOrderModal()">Annuler</button>
-            <button type="submit" class="action-button primary">Créer la commande</button>
+            <button type="button" class="action-button secondary" (click)="closeNewOrderModal()">إلغاء</button>
+            <button type="submit" class="action-button primary">إنشاء الطلب</button>
           </div>
         </form>
       </div>
     </div>
   </div>
   
-  <!-- QR Code Modal (shown after creating a new order) -->
+  <!-- QR Code Modal -->
   <div class="modal-overlay" *ngIf="isQrCodeModalOpen" (click)="closeQrCodeModal()">
     <div class="modal-content qr-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="modal-title">QR Code de la commande</h2>
+        <h2 class="modal-title">رمز QR للطلب</h2>
         <button class="modal-close-button" (click)="closeQrCodeModal()">×</button>
       </div>
       
       <div class="modal-body">
         <div id="qr-code-print-content">
-          <h3 class="qr-success-title">Commande créée avec succès</h3>
+          <h3 class="qr-success-title">تم إنشاء الطلب بنجاح</h3>
           <div class="qr-code-container">
             <qrcode 
               [qrdata]="qrCodeData" 
@@ -452,14 +439,14 @@
               [errorCorrectionLevel]="'M'"
             ></qrcode>
           </div>
-          <p class="qr-info">Scannez ce code QR pour accéder aux détails de la commande</p>
+          <p class="qr-info">امسح رمز QR للوصول إلى تفاصيل الطلب</p>
         </div>
         
         <div class="modal-footer qr-actions">
           <button class="action-button secondary" (click)="printQrCode()">
-            <i class="fas fa-print"></i> Imprimer
+            <i class="fas fa-print"></i> طباعة
           </button>
-          <button class="action-button primary" (click)="closeQrCodeModal()">Fermer</button>
+          <button class="action-button primary" (click)="closeQrCodeModal()">إغلاق</button>
         </div>
       </div>
     </div>

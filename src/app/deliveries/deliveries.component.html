@@ -80,7 +80,7 @@
           <button
             class="view-button"
             [class.active]="viewMode === 'list'"
-            (click)="viewMode = 'list'"
+            (click)="changeView('list')"
           >
             <i class="list-icon fas fa-list-alt"></i>
             Liste
@@ -88,70 +88,47 @@
           <button
             class="view-button"
             [class.active]="viewMode === 'map'"
-            (click)="viewMode = 'map'"
+            (click)="changeView('map')"
           >
-            <i class="card-icon fas fa-clone"></i>
+            <i class="card-icon fas fa-map"></i>
             Carte
           </button>
         </div>
       </div>
 
       <!-- List View -->
-      <div class="deliveries-grid" *ngIf="viewMode === 'list'">
-        <div class="delivery-card" *ngFor="let delivery of filteredDeliveries">
+      <div class="deliveries-grid" *ngIf="viewMode === 'list'" role="list">
+        <div class="delivery-card" 
+             *ngFor="let commande of commandes; trackBy: trackById"
+             role="listitem">
           <div class="delivery-header">
-            <div class="delivery-id">{{ delivery.id }}</div>
-            <span class="status-badge" [ngClass]="getStatusClass(delivery.status)">
-              {{ getStatusLabel(delivery.status) }}
-            </span>
+            <div class="delivery-id">Commande #{{ commande.idCmd }}</div>
+            <span class="status-badge {{ getStatusClass(commande.statut) }}">{{ getStatusLabel(commande.statut) }}</span>
           </div>
-
-          <div class="delivery-customer">
-            <div class="customer-name">{{ delivery.customer.name }}</div>
-            <div class="customer-address">{{ delivery.customer.address }}</div>
-          </div>
-
           <div class="delivery-info">
             <div class="info-item">
-              <span class="info-label">Montant:</span>
-              <span class="info-value">{{ delivery.amount }}</span>
+              <span class="info-label">Client:</span>
+              <span class="info-value">{{ commande.client?.nom }} {{ commande.client?.prenom }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Date/Heure:</span>
-              <span class="info-value">{{ delivery.time | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="info-label">Produit:</span>
+              <span class="info-value">{{ commande.produit?.nomProd }}</span>
             </div>
-            <div class="info-item" *ngIf="delivery.courier">
-              <span class="info-label">Livreur:</span>
-              <span class="info-value">{{ delivery.courier }}</span>
-            </div>
-          </div>
-
-          <div class="delivery-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="getDeliveryProgress(delivery)"></div>
+            <div class="info-item">
+              <span class="info-label">Total:</span>
+              <span class="info-value">{{ commande.prixTotale }} DTN</span>
             </div>
           </div>
-
-          <div class="delivery-actions">
-            <button class="action-button secondary" (click)="viewDeliveryDetails(delivery)">
-              <i class="details-icon fas fa-info-circle"></i>
-              Détails
-            </button>
-            <button class="action-button primary" (click)="openMapModal(delivery)">
-              <i class="location-icon fas fa-map-marker-alt"></i>
-              Localiser
-            </button>
-          </div>
+          <button class="action-btn view-btn" (click)="viewDeliveryDetails(commande)" aria-label="Voir les détails">Détails</button>
         </div>
       </div>
 
       <!-- Map View -->
       <div class="map-container" *ngIf="viewMode === 'map'">
-        <div class="map-placeholder">
-          <div class="map-overlay">
-            <h3>Vue Carte</h3>
-            <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie comme Google Maps ou Leaflet.</p>
-            <p>Dans une application réelle, vous verriez ici une carte interactive avec les emplacements des livraisons.</p>
+        <div class="map-placeholder" id="map">
+          <!-- Simplified loading message -->
+          <div class="map-overlay" *ngIf="!mapInitialized">
+            <h3>Chargement de la carte...</h3>
           </div>
         </div>
 
@@ -161,17 +138,17 @@
             <div
               class="map-delivery-item"
               *ngFor="let delivery of filteredDeliveries"
-              [class.active]="selectedDelivery?.id === delivery.id"
+              [class.active]="selectedDelivery?.idCmd === delivery.idCmd"
               (click)="selectedDelivery = delivery"
             >
               <div class="map-delivery-header">
-                <span class="map-delivery-id">{{ delivery.id }}</span>
-                <span class="status-badge small" [ngClass]="getStatusClass(delivery.status)">
-                  {{ getStatusLabel(delivery.status) }}
+                <span class="map-delivery-id">{{ delivery.idCmd }}</span>
+                <span class="status-badge small" [ngClass]="getStatusClass(delivery.statut)">
+                  {{ getStatusLabel(delivery.statut) }}
                 </span>
               </div>
-              <div class="map-delivery-customer">{{ delivery.customer.name }}</div>
-              <div class="map-delivery-address">{{ delivery.customer.address }}</div>
+              <div class="map-delivery-customer">{{ delivery.client?.nom }} {{ delivery.client?.prenom }}</div>
+              <div class="map-delivery-address">{{ delivery.client?.adresse }}</div>
             </div>
           </div>
         </div>
@@ -241,28 +218,34 @@
   </div>
 
   <!-- Delivery detail modal -->
-  <div class="modal-overlay" *ngIf="isDetailModalOpen" (click)="closeDetailModal()">
+  <div class="modal-overlay" 
+       *ngIf="isDetailModalOpen" 
+       role="dialog"
+       aria-labelledby="modalTitle"
+       (click)="closeDetailModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="modal-title">Détails de la livraison {{ selectedDelivery?.id }}</h2>
-        <button class="modal-close-button" (click)="closeDetailModal()">×</button>
+        <h2 class="modal-title" id="modalTitle">Détails de la livraison {{ selectedDelivery?.idCmd }}</h2>
+        <button class="modal-close-button" 
+                aria-label="Fermer"
+                (click)="closeDetailModal()">×</button>
       </div>
 
       <div class="modal-body" *ngIf="selectedDelivery">
         <div class="detail-grid">
           <div class="detail-section">
             <h3 class="section-title">Informations client</h3>
-            <div class="detail-item">
+            <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
               <span class="detail-label">Nom:</span>
-              <span class="detail-value">{{ selectedDelivery.customer.name }}</span>
+              <span class="detail-value">{{ selectedDelivery.client.nom }} {{ selectedDelivery.client.prenom }}</span>
             </div>
-            <div class="detail-item">
+            <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
               <span class="detail-label">Adresse:</span>
-              <span class="detail-value">{{ selectedDelivery.customer.address }}</span>
+              <span class="detail-value">{{ selectedDelivery.client.adresse }}</span>
             </div>
-            <div class="detail-item" *ngIf="selectedDelivery.customer.phone">
+            <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client && selectedDelivery.client.tlf">
               <span class="detail-label">Téléphone:</span>
-              <span class="detail-value">{{ selectedDelivery.customer.phone }}</span>
+              <span class="detail-value">{{ selectedDelivery.client.tlf }}</span>
             </div>
           </div>
 
@@ -270,25 +253,25 @@
             <h3 class="section-title">Informations livraison</h3>
             <div class="detail-item">
               <span class="detail-label">ID:</span>
-              <span class="detail-value">{{ selectedDelivery.id }}</span>
+              <span class="detail-value">{{ selectedDelivery.idCmd }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Statut:</span>
-              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.status)">
-                {{ getStatusLabel(selectedDelivery.status) }}
+              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.statut)">
+                {{ getStatusLabel(selectedDelivery.statut) }}
               </span>
             </div>
             <div class="detail-item">
               <span class="info-label">Montant:</span>
-              <span class="info-value">{{ selectedDelivery.amount }}</span>
+              <span class="info-value">{{ selectedDelivery.prixTotale }} DTN</span>
             </div>
             <div class="detail-item">
               <span class="info-label">Date/Heure:</span>
-              <span class="info-value">{{ selectedDelivery.time | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="info-value">{{ selectedDelivery.dateCmd | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
-            <div class="detail-item" *ngIf="selectedDelivery.courier">
+            <div class="detail-item">
               <span class="info-label">Livreur:</span>
-              <span class="info-value">{{ selectedDelivery.courier }}</span>
+              <span class="detail-value">{{ selectedDelivery.dashboardL?.livreur?.nom || 'غير معين' }}</span>
             </div>
           </div>
         </div>
@@ -302,11 +285,17 @@
   </div>
 
   <!-- Map modal -->
-  <div class="modal-overlay" *ngIf="isMapModalOpen" (click)="closeMapModal()">
+  <div class="modal-overlay" 
+       *ngIf="isMapModalOpen" 
+       role="dialog"
+       aria-labelledby="mapModalTitle"
+       (click)="closeMapModal()">
     <div class="modal-content map-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 class="modal-title">Localisation de la livraison {{ selectedDelivery?.id }}</h2>
-        <button class="modal-close-button" (click)="closeMapModal()">×</button>
+        <h2 class="modal-title" id="mapModalTitle">Localisation de la livraison {{ selectedDelivery?.idCmd }}</h2>
+        <button class="modal-close-button" 
+                aria-label="Fermer"
+                (click)="closeMapModal()">×</button>
       </div>
 
       <div class="modal-body">
@@ -324,25 +313,27 @@
               <h3 class="section-title">Informations livraison</h3>
               <div class="detail-item">
                 <span class="detail-label">ID:</span>
-                <span class="detail-value">{{ selectedDelivery.id }}</span>
+                <span class="detail-value">{{ selectedDelivery.idCmd }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Statut:</span>
-                <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.status)">
-                  {{ getStatusLabel(selectedDelivery.status) }}
+                <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.statut)">
+                  {{ getStatusLabel(selectedDelivery.statut) }}
                 </span>
               </div>
-              <div class="detail-item">
+              <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
                 <span class="detail-label">Client:</span>
-                <span class="detail-value">{{ selectedDelivery.customer.name }}</span>
+                <span class="detail-value">{{ selectedDelivery.client.nom }} {{ selectedDelivery.client.prenom }}</span>
               </div>
-              <div class="detail-item">
+              <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
                 <span class="detail-label">Adresse:</span>
-                <span class="detail-value">{{ selectedDelivery.customer.address }}</span>
+                <span class="detail-value">{{ selectedDelivery.client.adresse }}</span>
               </div>
-              <div class="detail-item" *ngIf="selectedDelivery.courier">
+              <div class="detail-item" *ngIf="selectedDelivery.dashboardL?.livreur?.nom">
                 <span class="detail-label">Livreur:</span>
-                <span class="detail-value">{{ selectedDelivery.courier }}</span>
+                <span class="detail-value">
+                  {{ selectedDelivery.dashboardL?.livreur?.nom || 'غير معين' }}
+                </span>
               </div>
             </div>
 
