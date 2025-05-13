@@ -1,3 +1,4 @@
+<!-- src/app/recent-deliveries/recent-deliveries.component.html -->
 <div class="deliveries-card">
   <div class="deliveries-header">
     <h3 class="deliveries-title">Livraisons récentes</h3>
@@ -7,7 +8,8 @@
           *ngFor="let tab of tabs" 
           class="tab-button" 
           [class.active]="selectedTab === tab.value"
-          (click)="onTabChange(tab.value)">
+          (click)="onTabChange(tab.value)"
+        >
           {{ tab.label }}
         </button>
       </div>
@@ -17,6 +19,9 @@
     </div>
   </div>
   <div class="deliveries-content">
+    <div *ngIf="filteredDeliveries.length === 0">
+      Les données ne sont pas disponibles ou sont vides.
+    </div>
     <div class="delivery-item" *ngFor="let delivery of filteredDeliveries">
       <div class="delivery-status-indicator" [ngClass]="getStatusClass(delivery.statut)"></div>
       <div class="delivery-info">
@@ -28,15 +33,15 @@
         </div>
         <p class="delivery-customer">
           {{ getCustomerName(delivery) }} •
-          {{ delivery.dateCmd | date:'dd/MM/yyyy HH:mm' }}
+          {{ delivery.dateCmd ? (delivery.dateCmd | date:'dd/MM/yyyy HH:mm') : 'Non définie' }}
         </p>
       </div>
       <div class="delivery-details">
         <p class="delivery-amount">
-          {{ delivery.prixTotale ? delivery.prixTotale + ' DTN' : 'Non disponible' }}
+          {{ delivery.montant ? delivery.montant + ' DTN' : 'Montant non disponible' }}
         </p>
         <p class="delivery-courier">
-          {{ delivery.dashboardL?.livreur?.nom || 'Non assigné' }}
+          {{ delivery.livreurNom || 'Non assigné' }}
         </p>
       </div>
       <button class="delivery-actions-button">

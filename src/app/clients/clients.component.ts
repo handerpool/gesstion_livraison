@@ -31,10 +31,15 @@ export class ClientsComponent implements OnInit {
   loadClients(): void {
     this.deliveryService.getTopClients(0, 10).subscribe({
       next: (data) => {
-        this.clients = data;
+        this.clients = data || [];
+        this.applyFilters();
+        console.log('Clients chargés:', this.clients);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des clients:', err);
+        this.clients = [];
         this.applyFilters();
       },
-      error: (err) => console.error('Error loading clients:', err),
     });
   }
 
@@ -49,25 +54,31 @@ export class ClientsComponent implements OnInit {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(
         (client) =>
-          client.nom.toLowerCase().includes(term) ||
-          client.prenom.toLowerCase().includes(term) ||
-          client.email.toLowerCase().includes(term)
+          (client.nom?.toLowerCase().includes(term) || '') ||
+          (client.prenom?.toLowerCase().includes(term) || '') ||
+          (client.email?.toLowerCase().includes(term) || '')
       );
     }
 
     if (this.statusFilter !== 'all') {
-      filtered = filtered.filter(
-        (client) =>
-          client.statut === RoleUser.client &&
-          (client.commandes ? client.commandes.length > 0 : false)
-      );
+      filtered = filtered.filter((client) => {
+        const hasOrders = client.commandes && client.commandes.length > 0;
+        if (this.statusFilter === 'active') {
+          return hasOrders;
+        } else if (this.statusFilter === 'inactive') {
+          return !hasOrders;
+        }
+        return true;
+      });
     }
 
     filtered.sort((a, b) => {
       let comparison = 0;
       switch (this.sortBy) {
         case 'nom':
-          comparison = `${a.nom} ${a.prenom}`.localeCompare(`${b.nom} ${b.prenom}`);
+          comparison = `${a.nom || ''} ${a.prenom || ''}`.localeCompare(
+            `${b.nom || ''} ${b.prenom || ''}`
+          );
           break;
         case 'codePostale':
           comparison = (a.codePostale || '').localeCompare(b.codePostale || '');
@@ -100,10 +111,14 @@ export class ClientsComponent implements OnInit {
   }
 
   addNewClient(): void {
-    alert('Add new client functionality would be implemented here');
+    alert('Fonctionnalité d’ajout de client à implémenter');
   }
 
   editClient(client: Client): void {
-    alert(`Edit client: ${client.nom} ${client.prenom}`);
+    alert(`Modifier le client: ${client.nom} ${client.prenom}`);
+  }
+
+  getClientStatus(client: Client | null): string {
+    return client?.commandes && client.commandes.length > 0 ? 'Actif' : 'Inactif';
   }
 }

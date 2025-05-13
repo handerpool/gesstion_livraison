@@ -1,63 +1,56 @@
+<!-- src/app/dashboard/dashboard.component.html -->
 <div class="dashboard-container">
-    <app-sidebar></app-sidebar>
-  
-    <div class="main-content">
-      <header class="dashboard-header">
-        <div>
-          <h1 class="dashboard-title">Tableau de bord des livraisons</h1>
-          <p class="dashboard-subtitle">Bienvenue, suivez vos livraisons en temps réel</p>
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <header class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Tableau de bord des livraisons</h1>
+        <p class="dashboard-subtitle">Bienvenue, suivez vos livraisons en temps réel</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-container">
+          <input type="text" placeholder="Rechercher..." class="search-input">
+          <i class="search-icon fas fa-search"></i>
         </div>
-  
-        <div class="header-actions">
-          <div class="search-container">
-            <input type="text" placeholder="Rechercher..." class="search-input">
-            <i class="search-icon fas fa-search"></i> 
-          </div>
-  
-          <button class="notification-button">
-            <i class="bell-icon fas fa-bell"></i>
-            <span class="notification-indicator"></span>
-          </button>
-  
-          <div class="user-profile">
-            <div class="avatar">CM</div>
-            <i class="dropdown-icon">▼</i>
-          </div>
+        <button class="notification-button">
+          <i class="bell-icon fas fa-bell"></i>
+          <span class="notification-indicator"></span>
+        </button>
+        <div class="user-profile">
+          <div class="avatar">CM</div>
+          <i class="dropdown-icon">▼</i>
         </div>
-      </header>
-  
-      <main class="dashboard-main">
-        <app-stats-cards></app-stats-cards>
-
-        <div class="charts-container">
+      </div>
+    </header>
+    <main class="dashboard-main">
+      <app-stats-cards></app-stats-cards>
+      <div class="charts-container">
+        <ng-container *ngIf="isBrowser">
+          <app-delivery-performance-chart
+            [selectedPeriod]="selectedPeriod"
+            (periodChange)="onPeriodChange($event)">
+          </app-delivery-performance-chart>
+        </ng-container>
+        <div class="charts-grid">
           <ng-container *ngIf="isBrowser">
-            <app-delivery-performance-chart 
-              [selectedPeriod]="selectedPeriod" 
-              (periodChange)="onPeriodChange($event)">
-            </app-delivery-performance-chart>
+            <app-delivery-status-chart></app-delivery-status-chart>
           </ng-container>
-  
-          <div class="charts-grid">
-            <ng-container *ngIf="isBrowser">
-              <app-delivery-status-chart></app-delivery-status-chart>
-            </ng-container>
-  
-            <ng-container *ngIf="isBrowser">
-              <app-customer-satisfaction-chart></app-customer-satisfaction-chart>
-            </ng-container>
-          </div>
+          <ng-container *ngIf="isBrowser">
+            <app-customer-satisfaction-chart></app-customer-satisfaction-chart>
+          </ng-container>
         </div>
-  
-        <div class="bottom-grid">
-          <app-recent-deliveries 
-            *ngIf="recentDeliveries.length > 0"
-            [deliveries]="recentDeliveries" 
-            [selectedTab]="selectedTab"
-            (tabChange)="onTabChange($event)">
-          </app-recent-deliveries>
-  
-          <app-top-locations [locations]="topLocations"></app-top-locations>
-        </div>
-      </main>
-    </div>
+      </div>
+      <div *ngIf="deliveries.length > 0; else noDeliveries">
+        <app-recent-deliveries
+          [deliveries]="deliveries"
+          [selectedTab]="selectedTab"
+          (tabChange)="onTabChange($event)">
+        </app-recent-deliveries>
+        <app-top-locations [locations]="topLocations"></app-top-locations>
+      </div>
+      <ng-template #noDeliveries>
+        <p class="error-message">Aucune livraison récente trouvée. Veuillez vérifier vos données ou réessayer plus tard.</p>
+      </ng-template>
+    </main>
+  </div>
 </div>

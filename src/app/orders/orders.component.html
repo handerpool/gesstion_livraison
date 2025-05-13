@@ -1,439 +1,280 @@
+<!-- src/app/orders/orders.component.html -->
 <div class="orders-container">
   <app-sidebar></app-sidebar>
-
   <div class="main-content">
     <header class="orders-header">
       <div>
         <h1 class="orders-title">Commandes</h1>
-        <p class="orders-subtitle">Gestion et suivi des commandes</p>
+        <p class="orders-subtitle">Gérez vos commandes en temps réel</p>
       </div>
-
       <div class="header-actions">
         <div class="search-container">
-          <input 
-            type="text" 
-            placeholder="Rechercher une commande..." 
+          <input
+            type="text"
+            placeholder="Rechercher une commande..."
             class="search-input"
-            (input)="onSearch($event)">
-            <i class="search-icon fas fa-search"></i> 
+            [(ngModel)]="searchTerm"
+            (input)="onSearch($event)"
+          />
+          <i class="search-icon fas fa-search"></i>
         </div>
-
-        <button class="notification-button">
-          <i class="bell-icon fas fa-bell"></i>
-          <span class="notification-indicator"></span>
-        </button>
-
-        <div class="user-profile">
-          <div class="avatar">CM</div>
-          <i class="dropdown-icon">▼</i>
-        </div>
+        <button class="new-order-button" (click)="openNewOrderModal()">Nouvelle commande</button>
       </div>
     </header>
 
     <main class="orders-main">
       <div class="filters-container">
         <div class="filter-group">
-          <label for="status-filter">Filtrer selon l'état :</label>
-          <select 
-            id="status-filter" 
+          <label for="status-filter">Statut:</label>
+          <select
+            id="status-filter"
             class="filter-select"
-            [value]="selectedStatus"
-            (change)="onStatusChange($event)">
+            [(ngModel)]="selectedStatus"
+            (change)="onStatusChange($event)"
+          >
             <option *ngFor="let option of statusOptions" [value]="option.value">
               {{ option.label }}
             </option>
           </select>
         </div>
-
         <div class="filter-group">
-          <label for="sort-by">Trier par :</label>
-          <div class="sort-controls">
-            <select 
-              id="sort-by" 
-              class="filter-select"
-              [value]="sortBy"
-              (change)="onSortChange($event)">
-              <option *ngFor="let option of sortOptions" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-            <button class="sort-direction-button" (click)="toggleSortDirection()">
-              <i class="sort-icon fas" [ngClass]="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
-            </button>
-          </div>
+          <label for="sort-filter">Trier par:</label>
+          <select
+            id="sort-filter"
+            class="filter-select"
+            [(ngModel)]="sortBy"
+            (change)="onSortChange($event)"
+          >
+            <option *ngFor="let option of sortOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
+        <button class="sort-direction-button" (click)="toggleSortDirection()">
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
+        </button>
+      </div>
 
-        <div class="filter-actions">
-          <button class="action-button primary" (click)="openNewOrderModal()">
-            <i class="add-icon">+</i>
-            Nouvelle commande
-          </button>
-          <button class="action-button secondary">
-            <i class="export-icon">↓</i>
-            Exporter
-          </button>
+      <div class="orders-grid" *ngIf="filteredOrders.length > 0">
+        <div class="order-card" *ngFor="let order of filteredOrders; trackBy: trackById">
+          <div class="order-header">
+            <div class="order-id">Commande #{{ order.idCmd }}</div>
+            <span class="status-badge {{ getStatusClass(order.statut) }}">{{ getStatusLabel(order.statut) }}</span>
+          </div>
+          <div class="order-info">
+            <div class="info-item">
+              <span class="info-label">Client:</span>
+              <span class="info-value">{{ order.clientNom }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Produit:</span>
+              <span class="info-value">{{ order.produitNom }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Total:</span>
+              <span class="info-value">{{ order.prixTotale }} DTN</span>
+            </div>
+          </div>
+          <button class="action-btn view-btn" (click)="viewOrderDetails(order)">Détails</button>
         </div>
       </div>
 
-      <div class="orders-table-container">
-        <table class="orders-table">
-          <thead>
-            <tr>
-              <th>Numéro de commande</th>
-              <th>Client</th>
-              <th>Date</th>
-              <th>Statut</th>
-              <th>Total</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let order of filteredOrders">
-              <td>{{ order?.idCmd }}</td>
-              <td>{{ order?.client?.nom }} {{ order?.client?.prenom }}</td>
-              <td>{{ order?.dateCmd | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>
-                <span class="status-badge" [ngClass]="getStatusClass(order?.statut)">
-                  {{ getStatusLabel(order?.statut) }}
-                </span>
-              </td>
-              <td>{{ order?.prixTotale }} D.T</td>
-              <td>
-                <div class="action-buttons">
-                  <button class="table-action-button" (click)="viewOrderDetails(order)" title="Afficher les détails">
-                      <i class="view-icon fas fa-eye"></i>
-                  </button>
-                  <button class="table-action-button" title="Modifier">
-                    <i class="edit-icon fas fa-pen"></i>                   
-                  </button>
-                  <button class="table-action-button" title="Options supplémentaires">
-                      <i class="fas fa-ellipsis-v more-icon"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="empty-state" *ngIf="filteredOrders.length === 0">
-          <div class="empty-icon">
-              <i class="fas fa-box-open"></i>
-          </div>            
-          <h3>Aucune commande trouvée</h3>
-          <p>Essayez de modifier les filtres ou d'effectuer une nouvelle recherche.</p>
-        </div>
+      <div class="empty-state" *ngIf="filteredOrders.length === 0">
+        <i class="fas fa-box"></i>
+        <h3>Aucune commande trouvée</h3>
+        <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
       </div>
 
       <div class="pagination-container" *ngIf="totalItems > 0">
-        <div class="pagination-info">
-          {{ getDisplayRange() }}
-        </div>
+        <div class="pagination-info">{{ getDisplayRange() }}</div>
         <div class="pagination-controls">
-          <button 
-            class="pagination-button" 
+          <button
+            class="pagination-button"
             [disabled]="currentPage === 1"
-            (click)="onPageChange(currentPage - 1)">
+            (click)="onPageChange(currentPage - 1)"
+          >
             Précédent
           </button>
-          
-          <button 
-            *ngIf="currentPage > 3"
-            class="pagination-button"
-            (click)="onPageChange(1)">
-            1
-          </button>
-          
-          <span *ngIf="currentPage > 3" class="pagination-ellipsis">...</span>
-          
-          <button 
+          <button
             *ngFor="let page of getPageNumbers()"
             class="pagination-button"
             [class.active]="page === currentPage"
-            (click)="onPageChange(page)">
+            (click)="onPageChange(page)"
+          >
             {{ page }}
           </button>
-          
-          <span *ngIf="currentPage < getTotalPages() - 2" class="pagination-ellipsis">...</span>
-          
-          <button 
-            *ngIf="currentPage < getTotalPages() - 2"
+          <button
             class="pagination-button"
-            (click)="onPageChange(getTotalPages())">
-            {{ getTotalPages() }}
-          </button>
-          
-          <button 
-            class="pagination-button" 
             [disabled]="currentPage === getTotalPages()"
-            (click)="onPageChange(currentPage + 1)">
+            (click)="onPageChange(currentPage + 1)"
+          >
             Suivant
           </button>
         </div>
       </div>
     </main>
   </div>
+
+  <!-- New Order Modal -->
+  <div class="modal-overlay" *ngIf="isNewOrderModalOpen" (click)="closeNewOrderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Nouvelle commande</h2>
+        <button class="modal-close-button" (click)="closeNewOrderModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="clientNom">Nom du client</label>
+          <input
+            id="clientNom"
+            [(ngModel)]="newOrder.clientNom"
+            type="text"
+            class="form-control"
+            placeholder="Nom du client"
+          />
+        </div>
+        <div class="form-group">
+          <label for="produitNom">Produit</label>
+          <input
+            id="produitNom"
+            [(ngModel)]="newOrder.produitNom"
+            type="text"
+            class="form-control"
+            placeholder="Nom du produit"
+          />
+        </div>
+        <div class="form-group">
+          <label for="adresse">Adresse</label>
+          <input
+            id="adresse"
+            [(ngModel)]="newOrder.adresse"
+            type="text"
+            class="form-control"
+            placeholder="Adresse de livraison"
+          />
+        </div>
+        <div class="form-group">
+          <label for="codePostale">Code postal</label>
+          <input
+            id="codePostale"
+            [(ngModel)]="newOrder.codePostale"
+            type="text"
+            class="form-control"
+            placeholder="Code postal"
+          />
+        </div>
+        <div class="form-group">
+          <label for="quantity">Quantité</label>
+          <input
+            id="quantity"
+            [(ngModel)]="newOrder.quantity"
+            type="number"
+            class="form-control"
+            min="1"
+          />
+        </div>
+        <div class="form-group">
+          <label for="prixTotale">Prix total</label>
+          <input
+            id="prixTotale"
+            [(ngModel)]="newOrder.prixTotale"
+            type="number"
+            class="form-control"
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <div class="form-group">
+          <label>Total calculé: {{ calculateTotal() }}</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-button secondary" (click)="closeNewOrderModal()">Annuler</button>
+        <button class="action-button primary" (click)="createNewOrder()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
   <div class="modal-overlay" *ngIf="isDetailModalOpen" (click)="closeDetailModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header" *ngIf="selectedOrder">
-        <h2 class="modal-title">Détails de la commande {{ selectedOrder.idCmd }}</h2>
+      <div class="modal-header">
+        <h2 class="modal-title">Détails de la commande {{ selectedOrder?.idCmd }}</h2>
         <button class="modal-close-button" (click)="closeDetailModal()">×</button>
       </div>
       <div class="modal-body" *ngIf="selectedOrder">
-    <div class="order-detail-grid">
-        <div class="order-detail-section">
+        <div class="detail-grid">
+          <div class="detail-section">
             <h3 class="section-title">Informations client</h3>
-            <div class="detail-item" *ngIf="selectedOrder && selectedOrder.client">
-                <span class="detail-label">Nom :</span>
-                <span class="detail-value">{{ selectedOrder.client.nom }} {{ selectedOrder.client.prenom }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedOrder && selectedOrder.client">
-                <span class="detail-label">Email :</span>
-                <span class="detail-value">{{ selectedOrder.client.email }}</span>
+            <div class="detail-item">
+              <span class="detail-label">Nom:</span>
+              <span class="detail-value">{{ selectedOrder.clientNom }}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Téléphone :</span>
-                <span class="detail-value">{{ selectedOrder.tlf }}</span>
-            </div>
-        </div>
-
-        <div class="order-detail-section">
-            <h3 class="section-title">Informations de la commande</h3>
-            <div class="detail-item">
-                <span class="detail-label">Date :</span>
-                <span class="detail-value">{{ selectedOrder.dateCmd | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="detail-label">Adresse:</span>
+              <span class="detail-value">{{ selectedOrder.adresse }}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Statut :</span>
-                <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedOrder.statut)">
-                    {{ getStatusLabel(selectedOrder.statut) }}
-                </span>
+              <span class="detail-label">Code postal:</span>
+              <span class="detail-value">{{ selectedOrder.codePostale }}</span>
+            </div>
+          </div>
+          <div class="detail-section">
+            <h3 class="section-title">Informations commande</h3>
+            <div class="detail-item">
+              <span class="detail-label">ID:</span>
+              <span class="detail-value">{{ selectedOrder.idCmd }}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Paiement :</span>
-                <span class="detail-value">{{ selectedOrder.estpayee ? 'Payé' : 'Non payé' }}</span>
+              <span class="detail-label">Statut:</span>
+              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedOrder.statut)">
+                {{ getStatusLabel(selectedOrder.statut) }}
+              </span>
             </div>
-        </div>
-
-        <div class="order-detail-section full-width">
-            <h3 class="section-title">Adresse de livraison</h3>
             <div class="detail-item">
-                <span class="detail-value">{{ selectedOrder.adresse }}</span>
+              <span class="detail-label">Produit:</span>
+              <span class="detail-value">{{ selectedOrder.produitNom }}</span>
             </div>
-        </div>
-
-        <div class="order-detail-section full-width">
-            <h3 class="section-title">Produit commandé</h3>
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>Produit</th>
-                        <th>Quantité</th>
-                        <th>Prix unitaire</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngIf="selectedOrder && selectedOrder.produit">
-                        <td>{{ selectedOrder.produit.nomProd }}</td>
-                        <td class="text-center">{{ selectedOrder.quantity }}</td>
-                        <td class="text-right">{{ selectedOrder.prixUnitaire }} DT</td>
-                        <td class="text-right">{{ selectedOrder.prixTotale }} DT</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="text-right"><strong>Total</strong></td>
-                        <td class="text-right"><strong>{{ selectedOrder.prixTotale }} DT</strong></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    
-          <div class="order-detail-section full-width">
-            <h3 class="section-title">Code QR de la commande</h3>
-            <div class="qr-code-container">
-              <qrcode 
-                [qrdata]="qrCodeData" 
-                [width]="200" 
-                [errorCorrectionLevel]="'M'"
-              ></qrcode>
-              <button class="action-button secondary qr-print-button" (click)="printQrCode()">
-                <i class="fas fa-print"></i> Imprimer le code QR
-              </button>
+            <div class="detail-item">
+              <span class="detail-label">Quantité:</span>
+              <span class="detail-value">{{ selectedOrder.quantity }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Montant:</span>
+              <span class="detail-value">{{ selectedOrder.prixTotale }} DTN</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Date:</span>
+              <span class="detail-value">{{ selectedOrder.dateCmd ? (selectedOrder.dateCmd | date:'dd/MM/yyyy HH:mm') : 'Non définie' }}</span>
             </div>
           </div>
         </div>
       </div>
-      
       <div class="modal-footer">
         <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
         <button class="action-button primary">Modifier le statut</button>
       </div>
     </div>
   </div>
-  
-  <div class="modal-overlay" *ngIf="isNewOrderModalOpen" (click)="closeNewOrderModal()">
-    <div class="modal-content new-order-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="modal-title">Nouvelle commande</h2>
-        <button class="modal-close-button" (click)="closeNewOrderModal()">×</button>
-      </div>
-      
-      <div class="modal-body">
-        <form (ngSubmit)="submitNewOrder()">
-          <div class="form-section">
-            <h3 class="section-title">Informations client</h3>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="customerName">Nom</label>
-                <input 
-                  type="text" 
-                  id="customerName" 
-                  name="customerName" 
-                  [(ngModel)]="newOrder.client.nom" 
-                  required
-                >
-              </div>
-              
-              <div class="form-group">
-                <label for="customerPrenom">Prénom</label>
-                <input 
-                  type="text" 
-                  id="customerPrenom" 
-                  name="customerPrenom" 
-                  [(ngModel)]="newOrder.client.prenom" 
-                  required
-                >
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="customerEmail">Email</label>
-                <input 
-                  type="email" 
-                  id="customerEmail" 
-                  name="customerEmail" 
-                  [(ngModel)]="newOrder.client.email"
-                >
-              </div>
-              
-              <div class="form-group">
-                <label for="customerPhone">Téléphone</label>
-                <input 
-                  type="tel" 
-                  id="customerPhone" 
-                  name="customerPhone" 
-                  [(ngModel)]="newOrder.client.tlf" 
-                  required
-                >
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="address">Adresse de livraison</label>
-              <textarea 
-                id="address" 
-                name="address" 
-                [(ngModel)]="newOrder.adresse" 
-                required
-              ></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="codePostale">Code postal</label>
-              <input 
-                type="text" 
-                id="codePostale" 
-                name="codePostale" 
-                [(ngModel)]="newOrder.codePostale" 
-                required
-              >
-            </div>
-          </div>
-          
-          <div class="form-section">
-            <h3 class="section-title">Produit</h3>
-            <div class="order-items">
-              <div class="order-item">
-                <div class="form-row">
-                  <div class="form-group item-name">
-                    <label for="itemName">Nom du produit</label>
-                    <input 
-                      type="text" 
-                      id="itemName" 
-                      name="itemName" 
-                      [(ngModel)]="newOrder.produit.nomProd" 
-                      required
-                    >
-                  </div>
-                  
-                  <div class="form-group item-quantity">
-                    <label for="itemQuantity">Quantité</label>
-                    <input 
-                      type="number" 
-                      id="itemQuantity" 
-                      name="itemQuantity" 
-                      [(ngModel)]="newOrder.quantity" 
-                      min="1" 
-                      required
-                    >
-                  </div>
-                  
-                  <div class="form-group item-price">
-                    <label for="itemPrice">Prix unitaire (D.T)</label>
-                    <input 
-                      type="number" 
-                      id="itemPrice" 
-                      name="itemPrice" 
-                      [(ngModel)]="newOrder.prixUnitaire" 
-                      step="0.01" 
-                      required
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="order-total">
-              <span class="total-label">Total:</span>
-              <span class="total-value">{{ calculateTotal() }}</span>
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button type="button" class="action-button secondary" (click)="closeNewOrderModal()">Annuler</button>
-            <button type="submit" class="action-button primary">Créer la commande</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+
+  <!-- QR Code Modal -->
   <div class="modal-overlay" *ngIf="isQrCodeModalOpen" (click)="closeQrCodeModal()">
-    <div class="modal-content qr-modal" (click)="$event.stopPropagation()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2 class="modal-title">Code QR de la commande</h2>
         <button class="modal-close-button" (click)="closeQrCodeModal()">×</button>
       </div>
-      
       <div class="modal-body">
         <div id="qr-code-print-content">
-          <h3 class="qr-success-title">Commande créée avec succès</h3>
-          <div class="qr-code-container">
-            <qrcode 
-              [qrdata]="qrCodeData" 
-              [width]="250" 
-              [errorCorrectionLevel]="'M'"
-            ></qrcode>
-          </div>
-          <p class="qr-info">Scannez le code QR pour accéder aux détails de la commande</p>
+          <h3>Commande #{{ selectedOrder?.idCmd }}</h3>
+          <p>Client: {{ selectedOrder?.clientNom }}</p>
+          <p>Montant: {{ selectedOrder?.prixTotale }} DTN</p>
+          <qrcode [qrdata]="qrCodeData" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
         </div>
-        
-        <div class="modal-footer qr-actions">
-          <button class="action-button secondary" (click)="printQrCode()">
-            <i class="fas fa-print"></i> Imprimer
-          </button>
-          <button class="action-button primary" (click)="closeQrCodeModal()">Fermer</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-button secondary" (click)="closeQrCodeModal()">Fermer</button>
+        <button class="action-button primary" (click)="printQrCode()">Imprimer</button>
       </div>
     </div>
   </div>

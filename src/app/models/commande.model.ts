@@ -1,54 +1,18 @@
-export interface Client {
-  idUser: number;
-  nom: string;
-  prenom: string;
-  email: string;
-  tlf: string;
-  adresse: string;
-  codePostale: string;
-  statut: 'client' | 'commercant' | 'livreur';
-}
-
-export interface Produit {
-  idProd: number;
-  nomProd: string;
-  prix: number;
-}
-
+// src/app/models/commande.model.ts
 export interface Commande {
   idCmd: number;
-  client?: {
-    idUser: number;
-    nom: string;
-    prenom: string;
-    email: string;
-    tlf: string;
-    adresse: string;
-    codePostale: string;
-    statut: string;
-  };
+  clientId: number;
+  clientNom: string;
   adresse: string;
   codePostale: string;
-  statut: 'annulé' | 'en_attente' | 'livré';
-  dateCmd: string | Date;
+  statut: string;
+  dateCmd: string | null;
   estpayee: boolean;
-  produit?: {
-    idProd: number;
-    nomProd: string;
-    prix: number;
-  };
+  produitId: number;
+  produitNom: string;
   quantity: number;
-  prixht: number;
-  prixUnitaire: number;
   prixTotale: number;
-  tlf: string;
-  qrCode?: any;
-  dashboardL?: {
-    livreur?: {
-      idUser: number;
-      nom: string;
-    };
-  };
+  livreurNom?: string; // Optional, as it may not always be present
 }
 
 export interface CommandeResponse {
@@ -58,17 +22,34 @@ export interface CommandeResponse {
   currentPage: number;
 }
 
+export interface CommandeSummary {
+  idCmd: number;
+  clientNom: string;
+  livreurNom: string;
+  statut: string;
+  dateCmd: string | null;
+  montant: number; // Added montant property
+}
+
 export interface DeliveryStats {
-  livré: { count: number; percentage: number };
-  en_attente: { count: number; percentage: number };
-  annulé: { count: number; percentage: number };
+  LIVRÉ: { count: number; percentage: number; color: string };
+  EN_ATTENTE: { count: number; percentage: number; color: string };
+  ANNULÉ: { count: number; percentage: number; color: string };
 }
 
 export interface StatsCard {
   title: string;
   value: string;
-  change?: string;
-  trend?: 'up' | 'down';
   icon: string;
+  color: string;
+  backgroundColor: string;
+  iconColor: string;
+  trend?: 'up' | 'down';
+  change?: string;
   iconBg?: string;
+}
+
+export interface Produit {
+  idProd: number;
+  nomProd: string;
 }

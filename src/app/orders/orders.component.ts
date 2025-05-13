@@ -1,18 +1,18 @@
+// src/app/orders/orders.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { DeliveryService } from '../services/delivery.service';
 import { FormsModule } from '@angular/forms';
 import { QRCodeModule } from 'angularx-qrcode';
-import { Commande, CommandeResponse, Produit } from '../models/commande.model';
-import { Client, RoleUser } from '../models/client.model';
+import { Commande, CommandeResponse } from '../models/commande.model';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
   imports: [CommonModule, DatePipe, SidebarComponent, FormsModule, QRCodeModule],
   templateUrl: './orders.component.html',
-  styleUrl: './orders.component.css',
+  styleUrls: ['./orders.component.css'],
 })
 export class OrdersComponent implements OnInit {
   Math = Math;
@@ -25,39 +25,37 @@ export class OrdersComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'desc';
   selectedOrder: Commande | null = null;
   isDetailModalOpen: boolean = false;
-  
   isNewOrderModalOpen: boolean = false;
   isQrCodeModalOpen: boolean = false;
   qrCodeData: string = '';
-  
-  newOrder: any = {
-    client: { nom: '', prenom: '', email: '', tlf: '' },
-    produit: { nomProd: '' },
+
+  newOrder: Partial<Commande> = {
+    clientNom: '',
+    produitNom: '',
     adresse: '',
     codePostale: '',
     statut: 'en_attente',
     dateCmd: new Date().toISOString(),
     quantity: 1,
-    prixUnitaire: 0,
     prixTotale: 0,
   };
-  
+
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalItems: number = 0;
   totalPages: number = 0;
-  
+
   statusOptions = [
     { value: 'all', label: 'Tous les statuts' },
     { value: 'en_attente', label: 'En attente' },
     { value: 'livré', label: 'Livré' },
     { value: 'annulé', label: 'Annulé' },
   ];
-  
+
   sortOptions = [
     { value: 'dateCmd', label: 'Date' },
     { value: 'idCmd', label: 'Numéro de commande' },
-    { value: 'client', label: 'Client' },
+    { value: 'clientNom', label: 'Client' },
     { value: 'prixTotale', label: 'Montant' },
   ];
 
@@ -68,45 +66,44 @@ export class OrdersComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.deliveryService.getCommandes(
-      this.currentPage - 1,
-      this.itemsPerPage,
-      this.selectedStatus,
-      this.searchTerm,
-      '', 
-      'all' 
-    ).subscribe({
-      next: (response: CommandeResponse) => {
-        console.log('Réponse API:', JSON.stringify(response, null, 2));
-        this.orders = response.commandes || [];
-        this.filteredOrders = [...this.orders];
-        this.totalItems = response.totalItems || this.orders.length;
-        this.totalPages = response.totalPages || Math.ceil(this.totalItems / this.itemsPerPage);
-        this.currentPage = response.currentPage || 1;
-        this.applyFilters();
-      },
-      error: (err) => {
-        console.error('Erreur lors de la récupération des commandes:', err);
-        this.filteredOrders = [];
-        this.totalItems = 0;
-        this.totalPages = 0;
-        alert('Erreur lors du chargement des commandes. Veuillez réessayer.');
-      },
-    });
+    this.deliveryService
+      .getCommandes(
+        this.currentPage - 1,
+        this.itemsPerPage,
+        this.selectedStatus,
+        this.searchTerm,
+        '',
+        'all'
+      )
+      .subscribe({
+        next: (response: CommandeResponse) => {
+          this.orders = response.commandes || [];
+          this.totalItems = response.totalItems || this.orders.length;
+          this.totalPages = response.totalPages || 1;
+          this.currentPage = (response.currentPage || 0) + 1;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Erreur:', error);
+          this.orders = [];
+          this.totalItems = 0;
+          this.totalPages = 0;
+        },
+      });
   }
 
   onStatusChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.selectedStatus = target.value;
     this.currentPage = 1;
-    this.applyFilters();
+    this.loadOrders();
   }
 
   onSearch(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
     this.currentPage = 1;
-    this.applyFilters();
+    this.loadOrders();
   }
 
   onSortChange(event: Event): void {
@@ -122,23 +119,22 @@ export class OrdersComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.applyFilters();
+    this.loadOrders();
   }
 
   applyFilters(): void {
     let filtered = [...this.orders];
 
-  
     if (this.selectedStatus !== 'all') {
-      filtered = filtered.filter(order => order.statut === this.selectedStatus);
+      filtered = filtered.filter((order) => order.statut === this.selectedStatus);
     }
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(order =>
-        `${order.client?.nom ?? ''} ${order.client?.prenom ?? ''}`.toLowerCase().includes(term) ||
-        order.client?.email?.toLowerCase().includes(term) ||
-        order.idCmd.toString().includes(term)
+      filtered = filtered.filter(
+        (order) =>
+          order.clientNom?.toLowerCase().includes(term) ||
+          order.idCmd.toString().includes(term)
       );
     }
 
@@ -148,16 +144,14 @@ export class OrdersComponent implements OnInit {
         case 'idCmd':
           comparison = a.idCmd - b.idCmd;
           break;
-        case 'client':
-          comparison = `${a.client?.nom ?? ''} ${a.client?.prenom ?? ''}`.localeCompare(
-            `${b.client?.nom ?? ''} ${b.client?.prenom ?? ''}`
-          );
+        case 'clientNom':
+          comparison = (a.clientNom || '').localeCompare(b.clientNom || '');
           break;
         case 'dateCmd':
-          comparison = new Date(a.dateCmd).getTime() - new Date(b.dateCmd).getTime();
+          comparison = new Date(a.dateCmd || '').getTime() - new Date(b.dateCmd || '').getTime();
           break;
         case 'prixTotale':
-          comparison = (a.prixTotale ?? 0) - (b.prixTotale ?? 0);
+          comparison = (a.prixTotale || 0) - (b.prixTotale || 0);
           break;
       }
       return this.sortDirection === 'asc' ? comparison : -comparison;
@@ -171,11 +165,9 @@ export class OrdersComponent implements OnInit {
   }
 
   viewOrderDetails(order: Commande): void {
-    if (order && order.client && order.produit) {
-      this.selectedOrder = order;
-      this.isDetailModalOpen = true;
-      this.generateQrCode(order);
-    }
+    this.selectedOrder = order;
+    this.isDetailModalOpen = true;
+    this.generateQrCode(order);
   }
 
   closeDetailModal(): void {
@@ -239,63 +231,48 @@ export class OrdersComponent implements OnInit {
     const end = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
     return `Affichage de ${start} à ${end} sur ${this.totalItems} commandes`;
   }
-  
+
   openNewOrderModal(): void {
     this.resetNewOrderForm();
     this.isNewOrderModalOpen = true;
   }
-  
+
   closeNewOrderModal(): void {
     this.isNewOrderModalOpen = false;
   }
-  
+
   resetNewOrderForm(): void {
     this.newOrder = {
-      client: { nom: '', prenom: '', email: '', tlf: '' },
-      produit: { nomProd: '' },
+      clientNom: '',
+      produitNom: '',
       adresse: '',
       codePostale: '',
       statut: 'en_attente',
       dateCmd: new Date().toISOString(),
       quantity: 1,
-      prixUnitaire: 0,
       prixTotale: 0,
     };
   }
-  
+
   calculateTotal(): string {
-    const total = (this.newOrder.quantity || 1) * (this.newOrder.prixUnitaire || 0);
+    const total = (this.newOrder.quantity || 1) * (this.newOrder.prixTotale || 0);
     return total.toFixed(2) + ' D.T';
   }
-  
-  submitNewOrder(): void {
+
+  createNewOrder(): void {
     const orderData: Commande = {
       idCmd: 0,
-      client: {
-        idUser: 0,
-        nom: this.newOrder.client!.nom,
-        prenom: this.newOrder.client!.prenom,
-        email: this.newOrder.client!.email,
-        tlf: this.newOrder.client!.tlf,
-        statut: RoleUser.client,
-      } as Client,
-      adresse: this.newOrder.adresse!,
-      codePostale: this.newOrder.codePostale!,
-      statut: this.newOrder.statut!,
-      dateCmd: this.newOrder.dateCmd!,
-      estpayee: this.newOrder.estpayee!,
-      produit: {
-        idProd: 0,
-        nomProd: this.newOrder.produit!.nomProd,
-        prix: this.newOrder.prixUnitaire!,
-      } as Produit,
-      quantity: this.newOrder.quantity!,
-      prixht: this.newOrder.prixUnitaire!,
-      prixUnitaire: this.newOrder.prixUnitaire!,
-      prixTotale: (this.newOrder.quantity! * this.newOrder.prixUnitaire!) || 0,
-      tlf: this.newOrder.client!.tlf,
-      qrCode: undefined,
-      dashboardL: undefined,
+      clientId: 0,
+      clientNom: this.newOrder.clientNom || '',
+      produitId: 0,
+      produitNom: this.newOrder.produitNom || '',
+      adresse: this.newOrder.adresse || '',
+      codePostale: this.newOrder.codePostale || '',
+      statut: this.newOrder.statut || 'en_attente',
+      dateCmd: this.newOrder.dateCmd || new Date().toISOString(),
+      estpayee: false,
+      quantity: this.newOrder.quantity || 1,
+      prixTotale: this.newOrder.prixTotale || 0,
     };
 
     this.deliveryService.createOrder(orderData).subscribe({
@@ -311,28 +288,28 @@ export class OrdersComponent implements OnInit {
       },
     });
   }
-  
+
   generateQrCode(order: Commande): void {
     this.qrCodeData = JSON.stringify({
       idCmd: order.idCmd,
-      clientName: `${order.client?.nom ?? ''} ${order.client?.prenom ?? ''}`,
-      prixTotale: order.prixTotale ?? 0,
+      clientName: order.clientNom,
+      prixTotale: order.prixTotale,
       dateCmd: order.dateCmd,
-      statut: order.statut
+      statut: order.statut,
     });
   }
-  
+
   closeQrCodeModal(): void {
     this.isQrCodeModalOpen = false;
   }
-  
+
   printQrCode(): void {
     const printContent = document.getElementById('qr-code-print-content');
     if (!printContent) return;
-    
+
     const windowPrint = window.open('', '', 'width=900,height=650');
     if (!windowPrint) return;
-    
+
     windowPrint.document.write(`
       <html>
         <head>
@@ -349,10 +326,14 @@ export class OrdersComponent implements OnInit {
         </body>
       </html>
     `);
-    
+
     windowPrint.document.close();
     windowPrint.focus();
     windowPrint.print();
     setTimeout(() => windowPrint.close(), 1000);
+  }
+
+  trackById(index: number, order: Commande): number {
+    return order.idCmd;
   }
 }

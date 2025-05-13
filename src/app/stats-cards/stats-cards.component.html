@@ -1,17 +1,14 @@
-<div class="stats-grid">
-  <div class="stats-card" *ngFor="let card of statsCards">
+<div *ngFor="let card of cards" class="stats-card" [style.border-left-color]="card.color">
     <div class="stats-content">
-      <div>
-        <p class="stats-title">{{ card.title }}</p>
-        <h3 class="stats-value">{{ card.value }}</h3>
+        <h3 class="stats-title">{{ card.title }}</h3>
+        <p class="stats-value">{{ card.value }}</p>
         <p class="stats-change" [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}">
-          <i class="trend-icon" [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}"></i>
-          {{ card.change }} ce mois-ci
+            <i class="fas fa-arrow-{{ card.trend === 'up' ? 'up' : 'down' }}-alt stats-trend-icon" 
+               [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}"></i>
+            {{ card.change || 'N/A' }} ce mois-ci
         </p>
-      </div>
-      <div class="stats-icon" [style.background-color]="card.iconBg + '1A'">
-        <i class="fas fa-{{ card.icon }}" [style.color]="card.iconBg"></i>
-      </div>
     </div>
-  </div>
+    <div class="stats-icon" [style.background-color]="(card.iconBg || card.backgroundColor) + '1A'">
+        <i class="fas fa-{{ card.icon }}" [style.color]="card.iconBg || card.iconColor"></i>
+    </div>
 </div>

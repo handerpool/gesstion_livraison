@@ -1,8 +1,9 @@
+// src/app/services/delivery.service.ts
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Commande, CommandeResponse, DeliveryStats, StatsCard } from '../models/commande.model';
+import { Commande, CommandeResponse, DeliveryStats, StatsCard, CommandeSummary } from '../models/commande.model';
 import { Client } from '../models/client.model';
 import { FinancialSummary } from '../models/financial-summary.model';
 
@@ -13,6 +14,17 @@ export class DeliveryService {
   private apiUrl = 'http://localhost:8081/api';
 
   constructor(private http: HttpClient) {}
+
+  getRecentDeliveries(page: number, size: number): Observable<CommandeSummary[]> {
+    return this.http.get<CommandeSummary[]>(
+      `${this.apiUrl}/dashboard/commandes/recent?page=${page}&size=${size}` // Updated to match backend endpoint
+    ).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de la récupération des livraisons récentes:', err);
+        return throwError(() => new Error('Échec de la récupération des livraisons récentes'));
+      })
+    );
+  }
 
   getDeliveries(
     page: number,
@@ -29,7 +41,6 @@ export class DeliveryService {
       .set('searchTerm', searchTerm)
       .set('date', date)
       .set('agent', agent);
-
     return this.http.get<CommandeResponse>(`${this.apiUrl}/orders`, { params }).pipe(
       catchError((err) => {
         console.error('Erreur lors de la récupération des livraisons:', err);
@@ -39,37 +50,24 @@ export class DeliveryService {
   }
 
   updateStatutCommande(id: number, statut: string): Observable<Commande> {
-    return this.http
-      .put<Commande>(`${this.apiUrl}/commandes/${id}/statut/${statut}`, {})
-      .pipe(
-        catchError((err) => {
-          console.error('Erreur lors de la mise à jour du statut de la livraison:', err);
-          return throwError(() => new Error('Échec de la mise à jour du statut de la livraison'));
-        })
-      );
+    return this.http.put<Commande>(`${this.apiUrl}/commandes/${id}/statut/${statut}`, {}).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de la mise à jour du statut de la livraison:', err);
+        return throwError(() => new Error('Échec de la mise à jour du statut de la livraison'));
+      })
+    );
   }
 
   getTopClients(page: number, size: number): Observable<Client[]> {
-    return this.http
-      .get<Client[]>(`${this.apiUrl}/dashboard/clients/top?page=${page}&size=${size}`)
-      .pipe(
-        catchError((err) => {
-          console.error('Erreur lors de la récupération des meilleurs clients:', err);
-          return throwError(() => new Error('Échec de la récupération des meilleurs clients'));
-        })
-      );
-  }
-
-  getRecentDeliveries(page: number, size: number): Observable<Commande[]> {
-    return this.http
-      .get<Commande[]>(`${this.apiUrl}/dashboard/commandes/recent?page=${page}&size=${size}`)
-      .pipe(
-        catchError((err) => {
-          console.error('Erreur lors de la récupération des livraisons récentes:', err);
-          const errorMessage = err.error?.error || 'Échec de la récupération des livraisons récentes. Vérifiez le serveur.';
-          return throwError(() => new Error(errorMessage));
-        })
-      );
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<Client[]>(`${this.apiUrl}/dashboard/clients/top`, { params }).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de la récupération des meilleurs clients:', err);
+        return throwError(() => new Error('Échec de la récupération des meilleurs clients'));
+      })
+    );
   }
 
   getDeliveryStats(): Observable<DeliveryStats> {
@@ -99,27 +97,16 @@ export class DeliveryService {
     );
   }
 
-  getCommandes(
-    page: number = 0,
-    size: number = 10,
-    status: string = 'all',
-    searchTerm: string = '',
-    date: string = '',
-    agent: string = 'all'
+ getCommandes(
+    page: number,
+    size: number,
+    status: string,
+    searchTerm: string,
+    date: string,
+    agent: string
   ): Observable<CommandeResponse> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('size', size.toString())
-      .set('status', status)
-      .set('searchTerm', searchTerm)
-      .set('date', date)
-      .set('agent', agent);
-
-    return this.http.get<CommandeResponse>(`${this.apiUrl}/orders`, { params }).pipe(
-      catchError((err) => {
-        console.error('Erreur lors de la récupération des commandes:', err);
-        return throwError(() => new Error('Échec de la récupération des commandes'));
-      })
+    return this.http.get<CommandeResponse>(
+      `${this.apiUrl}/orders?page=${page}&size=${size}&status=${status}&searchTerm=${searchTerm}&date=${date}&agent=${agent}`
     );
   }
 

@@ -1,133 +1,172 @@
-<div class="dashboard-container">  <!-- Keep the same class for consistent layout -->
-    <app-sidebar></app-sidebar>
-  
-    <div class="main-content">
-<div class="clients-container">
-    <div class="clients-header">
-      <h1>Clients</h1>
-      <button class="add-client-btn" (click)="addNewClient()">
-        <i class="fas fa-plus"></i> Ajouter un client
-      </button>
-    </div>
-  
-    <div class="search-filter-container">
-      <div class="search-box">
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
-          (input)="searchClients()" 
-          placeholder="Rechercher un client..."
-        >
-        <i class="fas fa-search"></i>
+<div class="dashboard-container">
+  <app-sidebar></app-sidebar>
+  <div class="main-content">
+    <div class="clients-container">
+      <div class="clients-header">
+        <h1>Clients</h1>
+        <button class="add-client-btn" (click)="addNewClient()">
+          <i class="fas fa-plus"></i> Ajouter un client
+        </button>
       </div>
-      
-      <div class="filter-options">
-        <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-          <option value="all">Tous les statuts</option>
-          <option value="active">Actifs</option>
-          <option value="inactive">Inactifs</option>
-        </select>
-      </div>
-    </div>
-  
-    <div class="clients-table-container">
-      <table class="clients-table">
-        <thead>
-          <tr>
-            <th (click)="toggleSort('nom')">
-              Nom
-              <i class="fas" [ngClass]="sortBy === 'nom' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
-            </th>
-            <th>Contact</th>
-            <th (click)="toggleSort('codePostale')">
-              Code postal
-              <i class="fas" [ngClass]="sortBy === 'codePostale' ? (sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
-            </th>
-            <th>Commandes</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let client of filteredClients">
-            <td>{{ client.nom }} {{ client.prenom }}</td>
-            <td>
-              <div>{{ client.email }}</div>
-              <div>{{ client.tlf }}</div>
-            </td>
-            <td>{{ client.codePostale }}</td>
-            <td>{{ client.commandes ? client.commandes.length : 0 }}</td>
-            <td>
-              <span class="status-badge">{{ client.statut }}</span>
-            </td>
-            <td class="actions-cell">
-              <button class="action-btn view-btn" (click)="viewClientDetails(client)" title="Voir les détails">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="action-btn edit-btn" (click)="editClient(client)" title="Modifier">
-                <i class="fas fa-edit"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  
-    <div class="modal-overlay" *ngIf="showClientDetails" (click)="closeClientDetails()">
-      <div class="client-details-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2>Détails du client</h2>
-          <button class="close-btn" (click)="closeClientDetails()">
-            <i class="fas fa-times"></i>
-          </button>
+
+      <div class="search-filter-container">
+        <div class="search-box">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="searchClients()"
+            placeholder="Rechercher un client..."
+          />
+          <i class="fas fa-search"></i>
         </div>
-        <div class="modal-content" *ngIf="selectedClient">
-          <div class="client-info-section">
-            <h3>Informations générales</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="label">Nom:</span>
-                <span class="value">{{ selectedClient.nom }} {{ selectedClient.prenom }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Email:</span>
-                <span class="value">{{ selectedClient.email }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Téléphone:</span>
-                <span class="value">{{ selectedClient.tlf }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Statut:</span>
-                <span class="value status-badge">
-                  {{ selectedClient.statut }}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="client-info-section">
-            <h3>Adresse</h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="label">Adresse:</span>
-                <span class="value">{{ selectedClient.adresse }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">Code postal:</span>
-                <span class="value">{{ selectedClient.codePostale }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="modal-actions">
-            <button class="edit-client-btn" (click)="editClient(selectedClient)">
-              <i class="fas fa-edit"></i> Modifier
+        <div class="filter-options">
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="all">Tous les statuts</option>
+            <option value="active">Actifs</option>
+            <option value="inactive">Inactifs</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="clients-table-container">
+        <table class="clients-table">
+          <thead>
+            <tr>
+              <th (click)="toggleSort('nom')">
+                Nom
+                <i
+                  class="fas"
+                  [ngClass]="
+                    sortBy === 'nom'
+                      ? sortDirection === 'asc'
+                        ? 'fa-sort-up'
+                        : 'fa-sort-down'
+                      : 'fa-sort'
+                  "
+                ></i>
+              </th>
+              <th>Contact</th>
+              <th (click)="toggleSort('codePostale')">
+                Code postal
+                <i
+                  class="fas"
+                  [ngClass]="
+                    sortBy === 'codePostale'
+                      ? sortDirection === 'asc'
+                        ? 'fa-sort-up'
+                        : 'fa-sort-down'
+                      : 'fa-sort'
+                  "
+                ></i>
+              </th>
+              <th>Commandes</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let client of filteredClients">
+              <td>{{ client.nom }} {{ client.prenom }}</td>
+              <td>
+                <div>{{ client.email || 'Non disponible' }}</div>
+                <div>{{ client.tlf || 'Non disponible' }}</div>
+              </td>
+              <td>{{ client.codePostale || 'Non disponible' }}</td>
+              <td>{{ client.commandes?.length || 0 }}</td>
+              <td>
+                <span class="status-badge">{{ getClientStatus(client) }}</span>
+              </td>
+              <td class="actions-cell">
+                <button
+                  class="action-btn view-btn"
+                  (click)="viewClientDetails(client)"
+                  title="Voir les détails"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="action-btn edit-btn"
+                  (click)="editClient(client)"
+                  title="Modifier"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        class="modal-overlay"
+        *ngIf="showClientDetails"
+        (click)="closeClientDetails()"
+      >
+        <div class="client-details-modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2>Détails du client</h2>
+            <button class="close-btn" (click)="closeClientDetails()">
+              <i class="fas fa-times"></i>
             </button>
+          </div>
+          <div class="modal-content" *ngIf="selectedClient">
+            <div class="client-info-section">
+              <h3>Informations générales</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="label">Nom:</span>
+                  <span class="value"
+                    >{{ selectedClient.nom }} {{ selectedClient.prenom }}</span
+                  >
+                </div>
+                <div class="info-item">
+                  <span class="label">Email:</span>
+                  <span class="value">{{
+                    selectedClient.email || 'Non disponible'
+                  }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Téléphone:</span>
+                  <span class="value">{{
+                    selectedClient.tlf || 'Non disponible'
+                  }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Statut:</span>
+                  <span class="value status-badge">{{
+                    getClientStatus(selectedClient)
+                  }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="client-info-section">
+              <h3>Adresse</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="label">Adresse:</span>
+                  <span class="value">{{
+                    selectedClient.adresse || 'Non disponible'
+                  }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Code postal:</span>
+                  <span class="value">{{
+                    selectedClient.codePostale || 'Non disponible'
+                  }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button
+                class="edit-client-btn"
+                (click)="editClient(selectedClient)"
+              >
+                <i class="fas fa-edit"></i> Modifier
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 </div>

@@ -1,16 +1,17 @@
-import { NgClass, NgFor, CommonModule } from '@angular/common';
+// src/app/recent-deliveries/recent-deliveries.component.ts
+import { NgClass, NgFor, CommonModule, DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
-import { Commande } from '../models/commande.model';
+import { CommandeSummary } from '../models/commande.model';
 
 @Component({
   selector: 'app-recent-deliveries',
   standalone: true,
-  imports: [NgClass, NgFor, CommonModule],
+  imports: [NgClass, NgFor, CommonModule, DatePipe],
   templateUrl: './recent-deliveries.component.html',
-  styleUrls: ['./recent-deliveries.component.css']
+  styleUrls: ['./recent-deliveries.component.css'],
 })
 export class RecentDeliveriesComponent implements OnInit {
-  @Input() deliveries: Commande[] = [];
+  @Input() deliveries: CommandeSummary[] = [];
   @Input() selectedTab: string = 'all';
   @Output() tabChange = new EventEmitter<string>();
 
@@ -23,8 +24,8 @@ export class RecentDeliveriesComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('Données reçues:', this.deliveries);
-    this.deliveries.forEach(delivery => 
-      console.log('Commande ID:', delivery.idCmd, 'Client:', delivery.client)
+    this.deliveries.forEach((delivery) =>
+      console.log('Commande ID:', delivery.idCmd, 'Client:', delivery.clientNom)
     );
   }
 
@@ -33,16 +34,17 @@ export class RecentDeliveriesComponent implements OnInit {
     this.tabChange.emit(tab);
   }
 
-  get filteredDeliveries(): Commande[] {
+  get filteredDeliveries(): CommandeSummary[] {
     if (this.selectedTab === 'all') {
       return this.deliveries;
     }
-    return this.deliveries.filter(delivery => delivery.statut === this.selectedTab);
+    return this.deliveries.filter((delivery) => delivery.statut === this.selectedTab);
   }
 
   getStatusClass(status: string): string {
     switch (status) {
       case 'livré':
+      case 'livre':
         return 'status-delivered';
       case 'en_attente':
         return 'status-pending';
@@ -69,17 +71,7 @@ export class RecentDeliveriesComponent implements OnInit {
     }
   }
 
-  getCustomerName(delivery: Commande): string {
-    if (!delivery.client) {
-      console.log('Client manquant pour la livraison:', delivery.idCmd);
-      return 'Non disponible';
-    }
-    
-    if (delivery.client && delivery.client.nom && delivery.client.prenom) {
-      return `${delivery.client.nom} ${delivery.client.prenom}`;
-    }
-    
-    console.log('Données client incomplètes pour la livraison:', delivery.idCmd, 'Client:', delivery.client);
-    return 'Non disponible';
+  getCustomerName(delivery: CommandeSummary): string {
+    return delivery.clientNom || 'Non disponible';
   }
 }

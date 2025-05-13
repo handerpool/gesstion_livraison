@@ -1,32 +1,33 @@
-import { NgClass, NgFor } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { StatsCard } from '../models/commande.model';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, NgClass } from '@angular/common';
 import { DeliveryService } from '../services/delivery.service';
+import { StatsCard } from '../models/commande.model';
 
 @Component({
-  selector: 'app-stats-cards',
-  standalone: true,
-  imports: [NgClass, NgFor],
-  templateUrl: './stats-cards.component.html',
-  styleUrls: ['./stats-cards.component.css']
+    selector: 'app-stats-cards',
+    standalone: true,
+    imports: [CommonModule, NgClass], // استيراد CommonModule وNgClass
+    templateUrl: './stats-cards.component.html',
+    styleUrls: ['./stats-cards.component.css']
 })
 export class StatsCardsComponent implements OnInit {
-  @Input() statsCards: StatsCard[] = [];
+    cards: StatsCard[] = [];
 
-  constructor(private deliveryService: DeliveryService) {}
+    constructor(private deliveryService: DeliveryService) {}
 
-  ngOnInit(): void {
-    this.fetchStatsCards();
-  }
+    ngOnInit(): void {
+        this.loadStatsCards();
+    }
 
-  private fetchStatsCards(): void {
-    this.deliveryService.getStatsCards().subscribe({
-      next: (data) => {
-        this.statsCards = data;
-      },
-      error: (err) => {
-        console.error('Error fetching stats cards:', err);
-      }
-    });
-  }
+    loadStatsCards(): void {
+        this.deliveryService.getStatsCards().subscribe({
+            next: (cards) => {
+                this.cards = cards;
+                console.log('Cartes chargées:', this.cards);
+            },
+            error: (error) => {
+                console.error('Erreur lors du chargement des cartes:', error);
+            }
+        });
+    }
 }

@@ -1,3 +1,4 @@
+<!-- src/app/deliveries/deliveries.component.html -->
 <div class="deliveries-container">
   <app-sidebar></app-sidebar>
   <div class="main-content">
@@ -6,7 +7,6 @@
         <h1 class="deliveries-title">Livraisons</h1>
         <p class="deliveries-subtitle">Suivez et gérez vos livraisons en temps réel</p>
       </div>
-
       <div class="header-actions">
         <div class="search-container">
           <input
@@ -18,12 +18,10 @@
           />
           <i class="search-icon fas fa-search"></i>
         </div>
-
         <button class="notification-button">
           <i class="bell-icon fas fa-bell"></i>
           <span class="notification-indicator"></span>
         </button>
-
         <div class="user-profile">
           <div class="avatar">CM</div>
           <i class="dropdown-icon">▼</i>
@@ -32,6 +30,7 @@
     </header>
 
     <main class="deliveries-main">
+      <!-- Filters -->
       <div class="filters-container">
         <div class="filter-group">
           <label for="status-filter">Statut:</label>
@@ -46,7 +45,6 @@
             </option>
           </select>
         </div>
-
         <div class="filter-group">
           <label for="date-filter">Date:</label>
           <input
@@ -57,7 +55,6 @@
             (change)="applyFilters()"
           />
         </div>
-
         <div class="filter-group">
           <label for="agent-filter">Livreur:</label>
           <select
@@ -71,7 +68,6 @@
             </option>
           </select>
         </div>
-
         <div class="view-toggle">
           <button
             class="view-button"
@@ -92,10 +88,13 @@
         </div>
       </div>
 
+      <!-- List View -->
       <div class="deliveries-grid" *ngIf="viewMode === 'list'" role="list">
-        <div class="delivery-card" 
-             *ngFor="let commande of commandes; trackBy: trackById"
-             role="listitem">
+        <div
+          class="delivery-card"
+          *ngFor="let commande of filteredDeliveries; trackBy: trackById"
+          role="listitem"
+        >
           <div class="delivery-header">
             <div class="delivery-id">Commande #{{ commande.idCmd }}</div>
             <span class="status-badge {{ getStatusClass(commande.statut) }}">{{ getStatusLabel(commande.statut) }}</span>
@@ -103,27 +102,38 @@
           <div class="delivery-info">
             <div class="info-item">
               <span class="info-label">Client:</span>
-              <span class="info-value">{{ commande.client?.nom }} {{ commande.client?.prenom }}</span>
+              <span class="info-value">{{ commande.clientNom }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Produit:</span>
-              <span class="info-value">{{ commande.produit?.nomProd }}</span>
+              <span class="info-value">{{ commande.produitNom }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Livreur:</span>
+              <span class="info-value">{{ commande.livreurNom || 'غير معين' }}</span> <!-- Fallback for unassigned livreur -->
             </div>
             <div class="info-item">
               <span class="info-label">Total:</span>
               <span class="info-value">{{ commande.prixTotale }} DTN</span>
             </div>
           </div>
-          <button class="action-btn view-btn" (click)="viewDeliveryDetails(commande)" aria-label="Voir les détails">Détails</button>
+          <button
+            class="action-btn view-btn"
+            (click)="viewDeliveryDetails(commande)"
+            aria-label="Voir les détails"
+          >
+            Détails
+          </button>
         </div>
       </div>
+
+      <!-- Map View -->
       <div class="map-container" *ngIf="viewMode === 'map'">
         <div class="map-placeholder" id="map">
           <div class="map-overlay" *ngIf="!mapInitialized">
             <h3>Chargement de la carte...</h3>
           </div>
         </div>
-
         <div class="map-sidebar">
           <h3 class="sidebar-title">Livraisons actives</h3>
           <div class="map-delivery-list">
@@ -139,19 +149,21 @@
                   {{ getStatusLabel(delivery.statut) }}
                 </span>
               </div>
-              <div class="map-delivery-customer">{{ delivery.client?.nom }} {{ delivery.client?.prenom }}</div>
-              <div class="map-delivery-address">{{ delivery.client?.adresse }}</div>
+              <div class="map-delivery-customer">{{ delivery.clientNom }}</div>
+              <div class="map-delivery-address">{{ delivery.adresse }}</div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Empty State -->
       <div class="empty-state" *ngIf="filteredDeliveries.length === 0">
         <i class="fas fa-truck"></i>
         <h3>Aucune livraison trouvée</h3>
         <p>Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.</p>
       </div>
 
+      <!-- Pagination -->
       <div class="pagination-container" *ngIf="totalItems > 0">
         <div class="pagination-info">
           Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
@@ -165,7 +177,6 @@
           >
             Précédent
           </button>
-
           <button
             *ngIf="currentPage > 3"
             class="pagination-button"
@@ -173,9 +184,7 @@
           >
             1
           </button>
-
           <span *ngIf="currentPage > 3" class="pagination-ellipsis">...</span>
-
           <button
             *ngFor="let page of getPageNumbers()"
             class="pagination-button"
@@ -184,9 +193,7 @@
           >
             {{ page }}
           </button>
-
           <span *ngIf="currentPage < getTotalPages() - 2" class="pagination-ellipsis">...</span>
-
           <button
             *ngIf="currentPage < getTotalPages() - 2"
             class="pagination-button"
@@ -194,7 +201,6 @@
           >
             {{ getTotalPages() }}
           </button>
-
           <button
             class="pagination-button"
             [disabled]="currentPage === getTotalPages()"
@@ -205,98 +211,43 @@
         </div>
       </div>
     </main>
-  </div>
 
-  <div class="modal-overlay" 
-       *ngIf="isDetailModalOpen" 
-       role="dialog"
-       aria-labelledby="modalTitle"
-       (click)="closeDetailModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="modal-title" id="modalTitle">Détails de la livraison {{ selectedDelivery?.idCmd }}</h2>
-        <button class="modal-close-button" 
-                aria-label="Fermer"
-                (click)="closeDetailModal()">×</button>
-      </div>
-
-      <div class="modal-body" *ngIf="selectedDelivery">
-        <div class="detail-grid">
-          <div class="detail-section">
-            <h3 class="section-title">Informations client</h3>
-            <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
-              <span class="detail-label">Nom:</span>
-              <span class="detail-value">{{ selectedDelivery.client.nom }} {{ selectedDelivery.client.prenom }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
-              <span class="detail-label">Adresse:</span>
-              <span class="detail-value">{{ selectedDelivery.client.adresse }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client && selectedDelivery.client.tlf">
-              <span class="detail-label">Téléphone:</span>
-              <span class="detail-value">{{ selectedDelivery.client.tlf }}</span>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <h3 class="section-title">Informations livraison</h3>
-            <div class="detail-item">
-              <span class="detail-label">ID:</span>
-              <span class="detail-value">{{ selectedDelivery.idCmd }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Statut:</span>
-              <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.statut)">
-                {{ getStatusLabel(selectedDelivery.statut) }}
-              </span>
-            </div>
-            <div class="detail-item">
-              <span class="info-label">Montant:</span>
-              <span class="info-value">{{ selectedDelivery.prixTotale }} DTN</span>
-            </div>
-            <div class="detail-item">
-              <span class="info-label">Date/Heure:</span>
-              <span class="info-value">{{ selectedDelivery.dateCmd | date:'dd/MM/yyyy HH:mm' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="info-label">Livreur:</span>
-              <span class="detail-value">{{ selectedDelivery.dashboardL?.livreur?.nom || 'غير معين' }}</span>
-            </div>
-          </div>
+    <!-- Detail Modal -->
+    <div
+      class="modal-overlay"
+      *ngIf="isDetailModalOpen"
+      role="dialog"
+      aria-labelledby="modalTitle"
+      (click)="closeDetailModal()"
+    >
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalTitle">Détails de la livraison {{ selectedDelivery?.idCmd }}</h2>
+          <button
+            class="modal-close-button"
+            aria-label="Fermer"
+            (click)="closeDetailModal()"
+          >
+            ×
+          </button>
         </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
-        <button class="action-button primary">Modifier le statut</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" 
-       *ngIf="isMapModalOpen" 
-       role="dialog"
-       aria-labelledby="mapModalTitle"
-       (click)="closeMapModal()">
-    <div class="modal-content map-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2 class="modal-title" id="mapModalTitle">Localisation de la livraison {{ selectedDelivery?.idCmd }}</h2>
-        <button class="modal-close-button" 
-                aria-label="Fermer"
-                (click)="closeMapModal()">×</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="map-detail-container">
-          <div class="map-detail-placeholder">
-            <div class="map-overlay">
-              <h3>Carte de livraison</h3>
-              <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie.</p>
-              <p>Dans une application réelle, vous verriez ici une carte interactive avec l'emplacement de la livraison.</p>
+        <div class="modal-body" *ngIf="selectedDelivery">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h3 class="section-title">Informations client</h3>
+              <div class="detail-item">
+                <span class="detail-label">Nom:</span>
+                <span class="detail-value">{{ selectedDelivery.clientNom }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Adresse:</span>
+                <span class="detail-value">{{ selectedDelivery.adresse }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Code postal:</span>
+                <span class="detail-value">{{ selectedDelivery.codePostale }}</span>
+              </div>
             </div>
-          </div>
-
-          <div class="map-detail-sidebar" *ngIf="selectedDelivery">
             <div class="detail-section">
               <h3 class="section-title">Informations livraison</h3>
               <div class="detail-item">
@@ -305,35 +256,102 @@
               </div>
               <div class="detail-item">
                 <span class="detail-label">Statut:</span>
-                <span class="detail-value status-badge" [ngClass]="getStatusClass(selectedDelivery.statut)">
+                <span
+                  class="detail-value status-badge"
+                  [ngClass]="getStatusClass(selectedDelivery.statut)"
+                >
                   {{ getStatusLabel(selectedDelivery.statut) }}
                 </span>
               </div>
-              <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
-                <span class="detail-label">Client:</span>
-                <span class="detail-value">{{ selectedDelivery.client.nom }} {{ selectedDelivery.client.prenom }}</span>
+              <div class="detail-item">
+                <span class="info-label">Montant:</span>
+                <span class="info-value">{{ selectedDelivery.prixTotale }} DTN</span>
               </div>
-              <div class="detail-item" *ngIf="selectedDelivery && selectedDelivery.client">
-                <span class="detail-label">Adresse:</span>
-                <span class="detail-value">{{ selectedDelivery.client.adresse }}</span>
+              <div class="detail-item">
+                <span class="info-label">Date/Heure:</span>
+                <span class="info-value">{{ selectedDelivery.dateCmd | date:'dd/MM/yyyy HH:mm' }}</span>
               </div>
-              <div class="detail-item" *ngIf="selectedDelivery.dashboardL?.livreur?.nom">
-                <span class="detail-label">Livreur:</span>
-                <span class="detail-value">
-                  {{ selectedDelivery.dashboardL?.livreur?.nom || 'Indéfini' }}
-                </span>
+              <div class="detail-item">
+                <span class="info-label">Livreur:</span>
+                <span class="detail-value">{{ selectedDelivery.livreurNom || 'غير معين' }}</span>
               </div>
             </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
+          <button class="action-button primary">Modifier le statut</button>
+        </div>
+      </div>
+    </div>
 
-            <div class="map-actions">
-              <button class="action-button secondary">
-                <i class="phone-icon">📞</i>
-                Appeler
-              </button>
-              <button class="action-button primary">
-                <i class="message-icon">💬</i>
-                Message
-              </button>
+    <!-- Map Modal -->
+    <div
+      class="modal-overlay"
+      *ngIf="isMapModalOpen"
+      role="dialog"
+      aria-labelledby="mapModalTitle"
+      (click)="closeMapModal()"
+    >
+      <div class="modal-content map-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title" id="mapModalTitle">Localisation de la livraison {{ selectedDelivery?.idCmd }}</h2>
+          <button
+            class="modal-close-button"
+            aria-label="Fermer"
+            (click)="closeMapModal()"
+          >
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="map-detail-container">
+            <div class="map-detail-placeholder">
+              <div class="map-overlay">
+                <h3>Carte de livraison</h3>
+                <p>Cette fonctionnalité nécessite l'intégration d'une API de cartographie.</p>
+                <p>Dans une application réelle, vous verriez ici une carte interactive avec l'emplacement de la livraison.</p>
+              </div>
+            </div>
+            <div class="map-detail-sidebar" *ngIf="selectedDelivery">
+              <div class="detail-section">
+                <h3 class="section-title">Informations livraison</h3>
+                <div class="detail-item">
+                  <span class="detail-label">ID:</span>
+                  <span class="detail-value">{{ selectedDelivery.idCmd }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Statut:</span>
+                  <span
+                    class="detail-value status-badge"
+                    [ngClass]="getStatusClass(selectedDelivery.statut)"
+                  >
+                    {{ getStatusLabel(selectedDelivery.statut) }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Client:</span>
+                  <span class="detail-value">{{ selectedDelivery.clientNom }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Adresse:</span>
+                  <span class="detail-value">{{ selectedDelivery.adresse }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Livreur:</span>
+                  <span class="detail-value">{{ selectedDelivery.livreurNom || 'غير معين' }}</span>
+                </div>
+              </div>
+              <div class="map-actions">
+                <button class="action-button secondary">
+                  <i class="phone-icon">📞</i>
+                  Appeler
+                </button>
+                <button class="action-button primary">
+                  <i class="message-icon">💬</i>
+                  Message
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+// src/app/deliveries/deliveries.component.ts
 import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
@@ -6,7 +7,6 @@ import { DeliveryService } from '../services/delivery.service';
 import { FormsModule } from '@angular/forms';
 import { Commande, CommandeResponse } from '../models/commande.model';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { DashboardL } from '../models/client.model';
 
 @Component({
   selector: 'app-deliveries',
@@ -71,21 +71,53 @@ export class DeliveriesComponent implements OnInit {
       )
       .subscribe({
         next: (response: CommandeResponse) => {
-          this.commandes = response.commandes;
-          this.filteredDeliveries = response.commandes;
-          this.totalItems = response.totalItems;
-          this.totalPages = response.totalPages;
+          console.log('Réponse API complète:', response);
+          this.commandes = response.commandes || [];
+          this.filteredDeliveries = response.commandes || [];
+          this.totalItems = response.totalItems || 0;
+          this.totalPages = response.totalPages || 0;
+          console.log('Commandes chargées:', this.commandes);
         },
-        error: (err) => console.error('Error loading commandes:', err),
+        error: (err) => {
+          console.error('Erreur lors du chargement des commandes:', err);
+          this.commandes = [];
+          this.filteredDeliveries = [];
+          this.totalItems = 0;
+          this.totalPages = 0;
+        },
       });
+  }
+
+  loadDeliveries(): void {
+    this.deliveryService.getDeliveries(0, 10, 'all', '', '', 'all').subscribe({
+      next: (response: CommandeResponse) => {
+        console.log('Réponse API complète:', response);
+        this.commandes = response.commandes || [];
+        this.filteredDeliveries = response.commandes || [];
+        this.totalItems = response.totalItems || 0;
+        this.totalPages = response.totalPages || 0;
+        console.log('Deliveries chargées:', this.filteredDeliveries);
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des livraisons:', error);
+        this.commandes = [];
+        this.filteredDeliveries = [];
+        this.totalItems = 0;
+        this.totalPages = 0;
+      },
+    });
   }
 
   loadDeliveryAgents(): void {
     this.deliveryService.getDeliveryAgents().subscribe({
       next: (agents) => {
-        this.deliveryAgents = [{ id: 'all', name: 'Tous les livreurs' }, ...agents];
+        this.deliveryAgents = agents || [];
+        console.log('Agents chargés:', this.deliveryAgents);
       },
-      error: (err) => console.error('Error loading delivery agents:', err),
+      error: (error) => {
+        console.error('Erreur lors du chargement des agents:', error);
+        this.deliveryAgents = [];
+      },
     });
   }
 
@@ -100,7 +132,7 @@ export class DeliveriesComponent implements OnInit {
   }
 
   viewDeliveryDetails(delivery: Commande): void {
-    if (delivery && delivery.client) {
+    if (delivery) {
       this.selectedDelivery = delivery;
       this.isDetailModalOpen = true;
     }
@@ -149,8 +181,8 @@ export class DeliveriesComponent implements OnInit {
     const totalPages = this.totalPages;
     let startPage = Math.max(1, this.currentPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
-    
-    return Array.from({length: endPage - startPage + 1}, (_, i) => startPage + i);
+
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   }
 
   trackById(index: number, item: Commande): number {
@@ -167,13 +199,13 @@ export class DeliveriesComponent implements OnInit {
     if (!this.isBrowser) {
       return;
     }
-    
-    import('leaflet').then(L => {
+
+    import('leaflet').then((L) => {
       const mapElement = document.getElementById('map');
       if (mapElement) {
         const map = L.map('map').setView([51.505, -0.09], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
+          attribution: '© OpenStreetMap contributors',
         }).addTo(map);
         this.mapInitialized = true;
       }
