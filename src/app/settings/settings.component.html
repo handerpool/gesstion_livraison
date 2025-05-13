@@ -16,9 +16,7 @@
           <li [ngClass]="{'active': activeTab === 'notifications'}" (click)="setActiveTab('notifications')">
             <i class="fas fa-bell"></i> Notifications
           </li>
-          <li [ngClass]="{'active': activeTab === 'display'}" (click)="setActiveTab('display')">
-            <i class="fas fa-desktop"></i> Affichage
-          </li>
+          
           <li [ngClass]="{'active': activeTab === 'security'}" (click)="setActiveTab('security')">
             <i class="fas fa-shield-alt"></i> Sécurité
           </li>
@@ -50,14 +48,7 @@
                 <input type="email" id="email" [(ngModel)]="userProfile.email">
               </div>
               
-              <div class="form-group">
-                <label for="role">Rôle</label>
-                <select id="role" [(ngModel)]="userProfile.role">
-                  <option value="Administrateur">Administrateur</option>
-                  <option value="Gestionnaire">Gestionnaire</option>
-                  <option value="Agent">Agent</option>
-                </select>
-              </div>
+            
               
               <div class="form-actions">
                 <button class="save-btn" (click)="saveProfile()">
@@ -87,78 +78,15 @@
           </div>
         </div>
         
-        <div class="settings-section" *ngIf="activeTab === 'display'">
-          <h2>Paramètres d'affichage</h2>
-          
-          <div class="display-settings">
-            <div class="form-group">
-              <label>Mode sombre</label>
-              <div class="toggle-wrapper">
-                <label class="switch">
-                  <input type="checkbox" [(ngModel)]="displaySettings.darkMode">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="language">Langue</label>
-              <select id="language" [(ngModel)]="displaySettings.language">
-                <option value="fr">Français</option>
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="de">Deutsch</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="dateFormat">Format de date</label>
-              <select id="dateFormat" [(ngModel)]="displaySettings.dateFormat">
-                <option value="dd/mm/yyyy">DD/MM/YYYY</option>
-                <option value="mm/dd/yyyy">MM/DD/YYYY</option>
-                <option value="yyyy-mm-dd">YYYY-MM-DD</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="timeFormat">Format d'heure</label>
-              <select id="timeFormat" [(ngModel)]="displaySettings.timeFormat">
-                <option value="24h">24 heures</option>
-                <option value="12h">12 heures (AM/PM)</option>
-              </select>
-            </div>
-            
-            <div class="form-actions">
-              <button class="save-btn" (click)="saveDisplaySettings()">
-                <i class="fas fa-save"></i> Enregistrer
-              </button>
-            </div>
-          </div>
-        </div>
+       
         
         <div class="settings-section" *ngIf="activeTab === 'security'">
           <h2>Paramètres de sécurité</h2>
           
           <div class="security-settings">
-            <div class="form-group">
-              <label>Authentification à deux facteurs</label>
-              <div class="toggle-wrapper">
-                <label class="switch">
-                  <input type="checkbox" [(ngModel)]="securitySettings.twoFactorAuth">
-                  <span class="slider round"></span>
-                </label>
-              </div>
-            </div>
+
             
-            <div class="form-group">
-              <label for="sessionTimeout">Délai d'expiration de session (minutes)</label>
-              <select id="sessionTimeout" [(ngModel)]="securitySettings.sessionTimeout">
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="60">1 heure</option>
-                <option value="120">2 heures</option>
-              </select>
-            </div>
+            
             
             <div class="password-section">
               <h3>Changer le mot de passe</h3>
