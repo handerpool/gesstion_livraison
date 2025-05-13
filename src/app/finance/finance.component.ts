@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Chart, ChartConfiguration } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,20 +30,30 @@ export class FinanceComponent implements OnInit {
     };
 
     dateFilter: string = 'all';
-    typeFilter: string = 'all';
     statusFilter: string = 'all';
     searchTerm: string = '';
 
     revenueChart!: Chart;
+    isBrowser: boolean;
 
-    constructor(private deliveryService: DeliveryService) {}
+    constructor(
+        private deliveryService: DeliveryService,
+        @Inject(PLATFORM_ID) platformId: Object
+    ) {
+        this.isBrowser = isPlatformBrowser(platformId);
+    }
 
     ngOnInit(): void {
         this.loadFinancialData();
     }
 
     ngAfterViewInit(): void {
-        this.initRevenueChart();
+        // Only initialize charts in browser environment
+        if (this.isBrowser) {
+            setTimeout(() => {
+                this.initRevenueChart();
+            }, 0);
+        }
     }
 
     loadFinancialData(): void {
@@ -51,51 +62,62 @@ export class FinanceComponent implements OnInit {
                 this.financialSummary = summary;
                 this.transactions = summary.recentTransactions;
                 this.filteredTransactions = [...this.transactions];
-                this.initRevenueChart();
+                
+                // Only initialize chart in browser environment
+                if (this.isBrowser && this.revenueChartCanvas) {
+                    setTimeout(() => {
+                        this.initRevenueChart();
+                    }, 0);
+                }
             },
             error: (err) => console.error('Erreur lors de la récupération des données financières :', err)
         });
     }
 
     initRevenueChart(): void {
-        if (!this.revenueChartCanvas) return;
-        const ctx = this.revenueChartCanvas.nativeElement.getContext('2d');
-        const labels = this.financialSummary.monthlyRevenue.map((item: MonthlyRevenue) => item.month);
-        const data = this.financialSummary.monthlyRevenue.map((item: MonthlyRevenue) => item.revenue);
+        // Only run in browser environment
+        if (!this.isBrowser || !this.revenueChartCanvas) return;
 
+        try {
+            const ctx = this.revenueChartCanvas.nativeElement.getContext('2d');
+            const labels = this.financialSummary.monthlyRevenue.map((item: MonthlyRevenue) => item.month);
+            const data = this.financialSummary.monthlyRevenue.map((item: MonthlyRevenue) => item.revenue);
 
-        if (this.revenueChart) {
-            this.revenueChart.destroy();
-        }
+            if (this.revenueChart) {
+                this.revenueChart.destroy();
+            }
 
-        const chartConfig: ChartConfiguration = {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Revenus mensuels (DT)',
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' DT';
+            const chartConfig: ChartConfiguration = {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenus mensuels (DT)',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' DT';
+                                }
                             }
                         }
                     }
                 }
-            }
-        };
+            };
 
-        this.revenueChart = new Chart(ctx, chartConfig);
+            this.revenueChart = new Chart(ctx, chartConfig);
+        } catch (err) {
+            console.error('Error initializing chart:', err);
+        }
     }
 
     applyFilters(): void {
@@ -123,10 +145,6 @@ export class FinanceComponent implements OnInit {
             }
         }
 
-        if (this.typeFilter !== 'all') {
-            filtered = filtered.filter(t => t.type === this.typeFilter);
-        }
-
         if (this.statusFilter !== 'all') {
             filtered = filtered.filter(t => t.status === this.statusFilter);
         }
@@ -144,7 +162,6 @@ export class FinanceComponent implements OnInit {
 
     resetFilters(): void {
         this.dateFilter = 'all';
-        this.typeFilter = 'all';
         this.statusFilter = 'all';
         this.searchTerm = '';
         this.filteredTransactions = [...this.transactions];
@@ -156,18 +173,9 @@ export class FinanceComponent implements OnInit {
 
     getStatusClass(status: string): string {
         switch (status) {
-            case 'livré': return 'status-completed';
-            case 'en_attente': return 'status-pending';
-            case 'annulé': return 'status-failed';
-            default: return '';
-        }
-    }
-
-    getTypeClass(type: string): string {
-        switch (type) {
-            case 'payment': return 'type-payment';
-            case 'refund': return 'type-refund';
-            case 'charge': return 'type-charge';
+            case 'Completed': return 'status-completed';
+            case 'Pending': return 'status-pending';
+            case 'Cancelled': return 'status-failed';
             default: return '';
         }
     }
