@@ -58,6 +58,15 @@ export class DeliveryService {
     );
   }
 
+  updateOrderStatus(idCmd: number, statut: string): Observable<Commande> {
+    return this.http.put<Commande>(`${this.apiUrl}/commandes/${idCmd}/statut/${statut}`, {}).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de la mise à jour du statut de la commande:', err);
+        return throwError(() => new Error('Échec de la mise à jour du statut de la commande'));
+      })
+    );
+  }
+
   getTopClients(page: number, size: number): Observable<Client[]> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -111,7 +120,7 @@ export class DeliveryService {
   }
 
   getDeliveryAgents(): Observable<{ id: string; name: string }[]> {
-    return this.http.get<{ id: string; name: string }[]>(`${this.apiUrl}/delivery-agents`).pipe(
+    return this.http.get<{ id: string; name: string }[]>(`${this.apiUrl}/livreurs/delivery-agents`).pipe(
       catchError((err) => {
         console.error('Erreur lors de la récupération des agents de livraison:', err);
         return throwError(() => new Error('Échec de la récupération des agents de livraison'));
@@ -133,6 +142,15 @@ export class DeliveryService {
       catchError((err) => {
         console.error('Erreur lors de la récupération des zones de livraison:', err);
         return throwError(() => new Error('Échec de la récupération des zones de livraison'));
+      })
+    );
+  }
+
+  assignLivreurToCommande(idCmd: number, idLivreur: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/commandes/${idCmd}/assign-livreur/${idLivreur}`, {}).pipe(
+      catchError((err) => {
+        console.error('Erreur lors de l\'assignation du livreur:', err);
+        return throwError(() => new Error('Échec de l\'assignation du livreur'));
       })
     );
   }
