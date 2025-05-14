@@ -28,6 +28,10 @@ export class OrdersComponent implements OnInit {
   isNewOrderModalOpen: boolean = false;
   isQrCodeModalOpen: boolean = false;
   qrCodeData: string = '';
+  notificationMessage: string | null = null;
+  temporaryStatus: string = '';
+  selectedLivreurId: number | null = null;
+  livreurs: { id: number; name: string }[] = []; // List of available delivery persons
 
   newOrder: Partial<Commande> = {
     clientNom: '',
@@ -63,6 +67,7 @@ export class OrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOrders();
+    this.loadLivreurs(); // Load delivery persons
   }
 
   loadOrders(): void {
@@ -90,6 +95,20 @@ export class OrdersComponent implements OnInit {
           this.totalPages = 0;
         },
       });
+  }
+
+  loadLivreurs(): void {
+    this.deliveryService.getDeliveryAgents().subscribe({
+      next: (response) => {
+        this.livreurs = response.map((livreur) => ({
+          id: Number(livreur.id), // Convert id to number
+          name: livreur.name,
+        }));
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des livreurs:', err);
+      },
+    });
   }
 
   onStatusChange(event: Event): void {
@@ -166,6 +185,7 @@ export class OrdersComponent implements OnInit {
 
   viewOrderDetails(order: Commande): void {
     this.selectedOrder = order;
+    this.temporaryStatus = order.statut || ''; // Initialize temporary status
     this.isDetailModalOpen = true;
     this.generateQrCode(order);
   }
@@ -335,5 +355,40 @@ export class OrdersComponent implements OnInit {
 
   trackById(index: number, order: Commande): number {
     return order.idCmd;
+  }
+
+  updateOrderStatus(): void {
+    if (!this.selectedOrder) return;
+
+    this.deliveryService.updateOrderStatus(this.selectedOrder.idCmd, this.temporaryStatus).subscribe({
+      next: (updatedOrder) => {
+        this.selectedOrder = updatedOrder;
+        this.loadOrders();
+        this.notificationMessage = 'Statut mis à jour avec succès.';
+        setTimeout(() => (this.notificationMessage = null), 3000); // Clear notification after 3 seconds
+      },
+      error: (err) => {
+        console.error('Erreur lors de la mise à jour du statut:', err);
+        this.notificationMessage = 'Erreur lors de la mise à jour du statut.';
+        setTimeout(() => (this.notificationMessage = null), 3000);
+      },
+    });
+  }
+
+  assignLivreur(): void {
+    if (!this.selectedOrder || !this.selectedLivreurId) return;
+
+    this.deliveryService.assignLivreurToCommande(this.selectedOrder.idCmd, this.selectedLivreurId).subscribe({
+      next: () => {
+        this.notificationMessage = 'Livreur assigné avec succès.';
+        setTimeout(() => (this.notificationMessage = null), 3000); // Clear notification after 3 seconds
+        this.loadOrders(); // Refresh orders
+      },
+      error: (err) => {
+        console.error('Erreur lors de l\'assignation du livreur:', err);
+        this.notificationMessage = 'Erreur lors de l\'assignation du livreur.';
+        setTimeout(() => (this.notificationMessage = null), 3000);
+      },
+    });
   }
 }

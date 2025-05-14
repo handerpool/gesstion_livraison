@@ -250,9 +250,25 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" *ngIf="selectedOrder">
         <button class="action-button secondary" (click)="closeDetailModal()">Fermer</button>
-        <button class="action-button primary">Modifier le statut</button>
+        <select [(ngModel)]="temporaryStatus" class="filter-select">
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <button class="action-button primary" (click)="updateOrderStatus()">Modifier le statut</button>
+
+        <select [(ngModel)]="selectedLivreurId" class="filter-select">
+          <option [value]="null" disabled selected>Choisir un livreur</option>
+          <option *ngFor="let livreur of livreurs" [value]="livreur.id">
+            {{ livreur.name }}
+          </option>
+        </select>
+        <button class="action-button primary" (click)="assignLivreur()">Assigner le livreur</button>
+      </div>
+      <div *ngIf="notificationMessage" class="notification">
+        {{ notificationMessage }}
       </div>
     </div>
   </div>
