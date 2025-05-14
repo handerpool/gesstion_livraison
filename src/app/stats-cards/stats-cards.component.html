@@ -1,14 +1,22 @@
-<div *ngFor="let card of cards" class="stats-card" [style.border-left-color]="card.color">
-    <div class="stats-content">
-        <h3 class="stats-title">{{ card.title }}</h3>
-        <p class="stats-value">{{ card.value }}</p>
-        <p class="stats-change" [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}">
-            <i class="fas fa-arrow-{{ card.trend === 'up' ? 'up' : 'down' }}-alt stats-trend-icon" 
-               [ngClass]="{'up': card.trend === 'up', 'down': card.trend === 'down'}"></i>
-            {{ card.change || 'N/A' }} ce mois-ci
-        </p>
-    </div>
-    <div class="stats-icon" [style.background-color]="(card.iconBg || card.backgroundColor) + '1A'">
-        <i class="fas fa-{{ card.icon }}" [style.color]="card.iconBg || card.iconColor"></i>
+<div class="stats-grid">
+    <div class="stats-card" *ngFor="let card of statsCards" 
+         [style.background-color]="card.backgroundColor"
+         [style.color]="card.color">
+        <div class="card-icon-container">
+            <div class="card-icon" [style.background-color]="card.iconBg">
+                <i class="fas fa-{{card.icon}}" [style.color]="card.iconColor"></i>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="card-title">{{card.title}}</div>
+            <div class="card-value">{{card.value}}</div>
+            <div class="card-trend" *ngIf="card.change" title="Trend this month">
+                <i class="fas" 
+                   [class.fa-arrow-up]="card.trend === 'up'"
+                   [class.fa-arrow-down]="card.trend === 'down'"
+                   [style.color]="card.trend === 'up' ? '#4CAF50' : '#F44336'"></i>
+                <span>{{card.change}} ce mois-ci</span>
+            </div>
+        </div>
     </div>
 </div>

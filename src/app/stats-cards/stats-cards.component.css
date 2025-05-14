@@ -3,76 +3,89 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
-  }
+    padding: 1rem; /* Add padding around grid */
+    background-color: #f9fafb; /* Light background for better contrast */
+    border-radius: 0.5rem; /* Rounded corners for the grid */
+}
   
-  @media (max-width: 1280px) {
+@media (max-width: 1280px) {
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
     }
-  }
+}
   
-  @media (max-width: 640px) {
+@media (max-width: 640px) {
     .stats-grid {
       grid-template-columns: 1fr;
     }
-  }
+}
   
-  .stats-card {
+.stats-card {
     background-color: white;
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
-  }
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content for a balanced layout */
+    text-align: center; /* Center text for better alignment */
+}
+
+.stats-card:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+}
   
-  .stats-content {
+.stats-content {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-  }
+}
   
-  .stats-title {
+.stats-title {
     font-size: 0.875rem;
     color: #6b7280;
     margin: 0 0 0.25rem 0;
-  }
+}
   
-  .stats-value {
+.stats-value {
     font-size: 1.875rem;
     font-weight: 700;
     margin: 0 0 0.25rem 0;
-  }
+}
   
-  .stats-change {
+.stats-change {
     font-size: 0.875rem;
     display: flex;
     align-items: center;
     margin: 0.25rem 0 0 0;
-  }
+}
   
-  .stats-change.up {
+.stats-change.up {
     color: #10b981;
-  }
+}
   
-  .stats-change.down {
+.stats-change.down {
     color: #ef4444;
-  }
+}
   
-  .trend-icon {
+.trend-icon {
     display: inline-block;
     width: 0.75rem;
     height: 0.75rem;
     margin-right: 0.25rem;
-  }
+}
   
-  .trend-icon.up::before {
+.trend-icon.up::before {
     content: "↑";
-  }
+}
   
-  .trend-icon.down::before {
+.trend-icon.down::before {
     content: "↓";
-  }
+}
   
-  .stats-icon {
+.stats-icon {
     padding: 0.75rem; /* Adjusted padding for better space */
     border-radius: 9999px;
     display: flex;
@@ -87,4 +100,53 @@
     display: flex;
     align-items: center; /* Ensures the icon aligns vertically */
     justify-content: center; /* Ensures the icon aligns horizontally */
+}
+
+.card-icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem; /* Add spacing below the icon */
+}
+
+.card-icon {
+    width: 4rem; /* Larger circular container */
+    height: 4rem;
+    border-radius: 50%; /* Make the container circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+}
+
+.card-icon:hover {
+    transform: scale(1.1); /* Slight zoom on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+.card-title {
+    font-weight: 600; /* Slightly bolder text for titles */
+    font-size: 1rem; /* Slightly larger font for better readability */
+    margin-bottom: 0.5rem; /* Add spacing below the title */
+}
+
+.card-value {
+    color: #1f2937; /* Darker color for better readability */
+    font-size: 2rem; /* Larger font for emphasis */
+    margin-bottom: 0.5rem; /* Add spacing below the value */
+}
+
+.card-description {
+    font-size: 0.875rem; /* Add a description section */
+    color: #6b7280; /* Subtle color for less emphasis */
+    margin-bottom: 1rem; /* Add spacing below the description */
+}
+
+.card-trend {
+    font-style: italic; /* Italicize trend text for emphasis */
+}
+
+.card-trend i {
+    margin-right: 0.25rem; /* Add spacing between icon and text */
 }
